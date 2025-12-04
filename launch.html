@@ -9,12 +9,12 @@
 <script>
     FHIR.oauth2.authorize({
         // The client_id that you should have obtained after registering a client at the EHR.
-        clientId: "2a4376d0-f213-46ea-8540-6e30f4821ca2",
+        clientId: "whatever",
         // The scopes that you request from the EHR. In this case we want to:
-        scope: "launch openid fhirUser patient/*.read",
+        scope: "patient/*.* user/*.* launch launch/patient launch/encounter openid fhirUser profile offline_access",
         // Typically, if your redirectUri points to the root of the current directory
         // (where the launchUri is), you can omit this option because the default value is ".".
-        redirectUri: "index.html"
+        redirectUri: "https://fenjj.github.io/embedding/index.html"
     });
 </script>
 </body>
