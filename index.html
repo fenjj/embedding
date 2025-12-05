@@ -21,6 +21,8 @@ border: 1px solid #CCC;
 <br/>
 <h4>Medications</h4>
 <div id="meds">Loading...</div>
+<h4>ClinicalImpression</h4>
+<div id="clinicalimpression">Loading...</div>
 
 <script type="text/javascript">
     FHIR.oauth2.ready().then(function(client) {
@@ -54,6 +56,29 @@ border: 1px solid #CCC;
                 document.getElementById("meds").innerText = error.stack;
             }
         );
+
+        // Get ClinicalImpression for the selected patient
+        client.request("/ClinicalImpression?patient=" + client.patient.id, {
+            resolveReferences: [ "note" ],
+            graph: true
+        })
+        // Reject if no ClinicalImpression are found
+        .then(function(data) {
+            if (!data.entry || !data.entry.length) {
+                throw new Error("No ClinicalImpression found for the selected patient");
+            }
+            return data.entry;
+        })
+        // Render the current patient's ClinicalImpressions (or any error)
+        .then(
+            function(meds) {
+                document.getElementById("clinicalimpression").innerText = JSON.stringify(meds, null, 4);
+            },
+            function(error) {
+                document.getElementById("clinicalimpression").innerText = error.stack;
+            }
+        );
+        
     }).catch(console.error);
 </script>
 </body>
