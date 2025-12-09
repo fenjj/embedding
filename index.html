@@ -59,7 +59,9 @@ border: 1px solid #CCC;
         );
 
         // Get ClinicalImpression for the selected patient
-        client.request("/ClinicalImpression?patient=" + client.patient.id, {
+        // "/ClinicalImpression?patient=" + client.patient.id
+        // "/Bundle?type=document"
+        client.request("/Bundle?type=document", {
             resolveReferences: [ "note" ],
             graph: true
         })
