@@ -1,0 +1,4386 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>範例頁面</title>
+<script src="https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.js"></script>
+<script src="/embedding/css/jquery-3.7.1.min.js" type="text/javascript"></script>
+<style>
+  .row { margin-bottom: 10px; }
+  table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+  table, th, td { border: 1px solid black; padding: 8px; }
+</style>
+</head>
+<body>
+
+<script type="text/javascript">//<![CDATA[
+
+    function getCookieByName(name) {
+        return value;
+    }
+    // // // $(document).ready(function() {
+    // // //   });
+    $(function() {
+        
+        FHIR.oauth2.ready().then(function(client) {
+            // Render the current patient (or any error)
+            client.patient.read().then(
+                function(pt) {
+                    document.getElementById("idInput").setAttribute('value', client.patient.id);
+                },
+                function(error) {
+                    document.getElementById("patient").innerText = error.stack;
+                }
+            );
+
+            // Get ClinicalImpression for the selected patient
+            // "/ClinicalImpression?patient=" + client.patient.id
+            // "/Bundle?type=document"
+            client.request("/Bundle?type=document", {
+                // resolveReferences: [ "note" ],
+                graph: true
+            })
+            // Reject if no ClinicalImpression are found
+            .then(function(data) {
+                if (!data.entry || !data.entry.length) {
+                    throw new Error("No ClinicalImpression found for the selected patient");
+                }
+                return data.entry;
+            })
+            // Render the current patient's ClinicalImpressions (or any error)
+            .then(
+                function(meds) {
+                    document.getElementById("resultTable").innerText = JSON.stringify(meds, null, 4);
+                },
+                function(error) {
+                    document.getElementById("resultTable").innerText = error.stack;
+                }
+            );        
+        }).catch(console.error);
+    });
+//]]></script>
+
+<h2>身份碼輸入</h2>
+
+<!-- 身份碼 -->
+<div class="row">
+  <label>身份碼：</label>
+  <input type="text" id="idInput" />
+  <!-- 
+  <button onclick="loadEMRForm()">取得病歷清單</button>
+  -->
+</div>
+
+<!-- 可輸入的下拉選單 + 右側文字框 -->
+<div class="row">
+  <label>選擇項目：</label>
+
+  <input list="options" id="dropdownInput" onkeydown="if (event.key === 'Enter' && !event.isComposing) {handleDropdownChange();}" onblur="handleDropdownChange();" />
+  <datalist id="options">
+    <option value="C00.0">
+    <option value="C00.1">
+    <option value="C00.2">
+    <option value="C00.3">
+    <option value="C00.4">
+    <option value="C00.5">
+    <option value="C00.6">
+    <option value="C00.8">
+    <option value="C00.9">
+    <option value="C01">
+    <option value="C02.0">
+    <option value="C02.1">
+    <option value="C02.2">
+    <option value="C02.3">
+    <option value="C02.4">
+    <option value="C02.8">
+    <option value="C03.0">
+    <option value="C03.1">
+    <option value="C03.9">
+    <option value="C04.0">
+    <option value="C04.1">
+    <option value="C04.8">
+    <option value="C04.9">
+    <option value="C05.0">
+    <option value="C05.1">
+    <option value="C05.2">
+    <option value="C05.8">
+    <option value="C05.9">
+    <option value="C06.0">
+    <option value="C06.1">
+    <option value="C06.2">
+    <option value="C06.80">
+    <option value="C06.89">
+    <option value="C06.9">
+    <option value="C07">
+    <option value="C08.0">
+    <option value="C08.1">
+    <option value="C08.9">
+    <option value="C09.0">
+    <option value="C09.1">
+    <option value="C09.8">
+    <option value="C09.9">
+    <option value="C10.0">
+    <option value="C10.1">
+    <option value="C10.2">
+    <option value="C10.3">
+    <option value="C10.4">
+    <option value="C10.8">
+    <option value="C10.9">
+    <option value="C11.0">
+    <option value="C11.1">
+    <option value="C11.2">
+    <option value="C11.3">
+    <option value="C11.8">
+    <option value="C11.9">
+    <option value="C12">
+    <option value="C13.0">
+    <option value="C13.1">
+    <option value="C13.2">
+    <option value="C13.8">
+    <option value="C13.9">
+    <option value="C14.0">
+    <option value="C14.8">
+    <option value="C15.3">
+    <option value="C15.4">
+    <option value="C15.8">
+    <option value="C15.9">
+    <option value="C16.0">
+    <option value="C49.A1">
+    <option value="C16.1">
+    <option value="C16.3">
+    <option value="C16.4">
+    <option value="C16.6">
+    <option value="C16.8">
+    <option value="C16.9">
+    <option value="C49.A2">
+    <option value="C17.0">
+    <option value="C17.1">
+    <option value="C17.2">
+    <option value="C17.3">
+    <option value="C17.8">
+    <option value="C17.9">
+    <option value="C18.0">
+    <option value="C18.1">
+    <option value="C18.2">
+    <option value="C18.3">
+    <option value="C18.4">
+    <option value="C18.5">
+    <option value="C18.6">
+    <option value="C18.7">
+    <option value="C18.8">
+    <option value="C18.9">
+    <option value="C19">
+    <option value="C20">
+    <option value="C21.0">
+    <option value="C21.1">
+    <option value="C21.2">
+    <option value="C21.8">
+    <option value="C22.0">
+    <option value="C22.1">
+    <option value="C22.2">
+    <option value="C22.3">
+    <option value="C22.4">
+    <option value="C22.7">
+    <option value="C22.8">
+    <option value="C22.9">
+    <option value="C23">
+    <option value="C24.0">
+    <option value="C24.8">
+    <option value="C24.9">
+    <option value="C25.0">
+    <option value="C25.1">
+    <option value="C25.2">
+    <option value="C25.3">
+    <option value="C25.4">
+    <option value="C25.7">
+    <option value="C25.8">
+    <option value="C25.9">
+    <option value="C26.0">
+    <option value="C26.1">
+    <option value="C26.9">
+    <option value="C30.0">
+    <option value="C30.1">
+    <option value="C31.0">
+    <option value="C31.1">
+    <option value="C31.2">
+    <option value="C31.3">
+    <option value="C31.8">
+    <option value="C31.9">
+    <option value="C32.0">
+    <option value="C32.1">
+    <option value="C32.2">
+    <option value="C32.3">
+    <option value="C32.8">
+    <option value="C32.9">
+    <option value="C33">
+    <option value="C34.00">
+    <option value="C34.01">
+    <option value="C34.02">
+    <option value="C34.10">
+    <option value="C34.11">
+    <option value="C34.12">
+    <option value="C34.2">
+    <option value="C34.30">
+    <option value="C34.31">
+    <option value="C34.32">
+    <option value="C34.80">
+    <option value="C34.81">
+    <option value="C34.82">
+    <option value="C34.90">
+    <option value="C34.91">
+    <option value="C34.92">
+    <option value="C37">
+    <option value="C38.0">
+    <option value="C38.1">
+    <option value="C38.2">
+    <option value="C38.3">
+    <option value="C38.4">
+    <option value="C38.8">
+    <option value="C39.0">
+    <option value="C39.9">
+    <option value="C40.00">
+    <option value="C40.01">
+    <option value="C40.02">
+    <option value="C40.10">
+    <option value="C40.11">
+    <option value="C40.12">
+    <option value="C40.20">
+    <option value="C40.21">
+    <option value="C40.22">
+    <option value="C40.30">
+    <option value="C40.31">
+    <option value="C40.32">
+    <option value="C40.80">
+    <option value="C40.81">
+    <option value="C40.82">
+    <option value="C40.90">
+    <option value="C40.91">
+    <option value="C40.92">
+    <option value="C41.0">
+    <option value="C41.1">
+    <option value="C41.2">
+    <option value="C41.3">
+    <option value="C41.4">
+    <option value="C41.9">
+    <option value="C43.0">
+    <option value="C43.10">
+    <option value="C43.111">
+    <option value="C43.112">
+    <option value="C43.121">
+    <option value="C43.122">
+    <option value="C43.20">
+    <option value="C43.21">
+    <option value="C43.22">
+    <option value="C43.30">
+    <option value="C43.31">
+    <option value="C43.39">
+    <option value="C43.4">
+    <option value="C43.51">
+    <option value="C43.52">
+    <option value="C43.59">
+    <option value="C43.60">
+    <option value="C43.61">
+    <option value="C43.62">
+    <option value="C43.70">
+    <option value="C43.71">
+    <option value="C43.72">
+    <option value="C43.8">
+    <option value="C43.9">
+    <option value="C44.00">
+    <option value="C44.01">
+    <option value="C44.02">
+    <option value="C44.09">
+    <option value="C44.101">
+    <option value="C44.1021">
+    <option value="C44.1022">
+    <option value="C44.1091">
+    <option value="C44.1092">
+    <option value="C44.111">
+    <option value="C44.1121">
+    <option value="C44.1122">
+    <option value="C44.1191">
+    <option value="C44.1192">
+    <option value="C44.121">
+    <option value="C44.1221">
+    <option value="C44.1222">
+    <option value="C44.1291">
+    <option value="C44.1292">
+    <option value="C44.131">
+    <option value="C44.191">
+    <option value="C44.1321">
+    <option value="C44.1322">
+    <option value="C44.1921">
+    <option value="C44.1922">
+    <option value="C44.1391">
+    <option value="C44.1392">
+    <option value="C44.1991">
+    <option value="C44.1992">
+    <option value="C44.201">
+    <option value="C44.202">
+    <option value="C44.209">
+    <option value="C44.211">
+    <option value="C44.212">
+    <option value="C44.219">
+    <option value="C44.221">
+    <option value="C44.222">
+    <option value="C44.229">
+    <option value="C44.291">
+    <option value="C44.292">
+    <option value="C44.299">
+    <option value="C44.300">
+    <option value="C44.301">
+    <option value="C44.309">
+    <option value="C44.310">
+    <option value="C44.311">
+    <option value="C44.319">
+    <option value="C44.320">
+    <option value="C44.321">
+    <option value="C44.329">
+    <option value="C44.390">
+    <option value="C44.391">
+    <option value="C44.399">
+    <option value="C44.40">
+    <option value="C44.41">
+    <option value="C44.42">
+    <option value="C44.49">
+    <option value="C44.500">
+    <option value="C44.501">
+    <option value="C44.509">
+    <option value="C44.510">
+    <option value="C44.511">
+    <option value="C44.519">
+    <option value="C44.520">
+    <option value="C44.521">
+    <option value="C44.529">
+    <option value="C44.590">
+    <option value="C44.591">
+    <option value="C44.599">
+    <option value="C44.601">
+    <option value="C44.602">
+    <option value="C44.609">
+    <option value="C44.611">
+    <option value="C44.612">
+    <option value="C44.619">
+    <option value="C44.621">
+    <option value="C44.622">
+    <option value="C44.629">
+    <option value="C44.691">
+    <option value="C44.692">
+    <option value="C44.699">
+    <option value="C44.701">
+    <option value="C44.702">
+    <option value="C44.709">
+    <option value="C44.711">
+    <option value="C44.712">
+    <option value="C44.719">
+    <option value="C44.721">
+    <option value="C44.722">
+    <option value="C44.729">
+    <option value="C44.791">
+    <option value="C44.792">
+    <option value="C44.799">
+    <option value="C44.80">
+    <option value="C44.81">
+    <option value="C44.82">
+    <option value="C44.89">
+    <option value="C44.90">
+    <option value="C44.91">
+    <option value="C44.92">
+    <option value="C44.99">
+    <option value="C45.0">
+    <option value="C45.1">
+    <option value="C45.2">
+    <option value="C45.7">
+    <option value="C45.9">
+    <option value="C46.0">
+    <option value="C46.1">
+    <option value="C46.2">
+    <option value="C46.3">
+    <option value="C46.4">
+    <option value="C46.50">
+    <option value="C46.51">
+    <option value="C46.52">
+    <option value="C46.7">
+    <option value="C46.9">
+    <option value="C47.0">
+    <option value="C47.10">
+    <option value="C47.11">
+    <option value="C47.12">
+    <option value="C47.20">
+    <option value="C47.21">
+    <option value="C47.22">
+    <option value="C47.3">
+    <option value="C47.4">
+    <option value="C47.5">
+    <option value="C47.6">
+    <option value="C47.8">
+    <option value="C47.9">
+    <option value="C48.0">
+    <option value="C48.1">
+    <option value="C48.2">
+    <option value="C48.8">
+    <option value="C49.0">
+    <option value="C49.10">
+    <option value="C49.11">
+    <option value="C49.12">
+    <option value="C49.20">
+    <option value="C49.21">
+    <option value="C49.22">
+    <option value="C49.3">
+    <option value="C49.4">
+    <option value="C49.A0">
+    <option value="C49.A3">
+    <option value="C49.A4">
+    <option value="C49.A5">
+    <option value="C49.5">
+    <option value="C49.6">
+    <option value="C49.A9">
+    <option value="C49.8">
+    <option value="C49.9">
+    <option value="C4A.0">
+    <option value="C4A10">
+    <option value="C4A.11">
+    <option value="C4A.112">
+    <option value="C4A.121">
+    <option value="C4A.122">
+    <option value="C4A.20">
+    <option value="C4A.21">
+    <option value="C4A.22">
+    <option value="C4A.30">
+    <option value="C4A.31">
+    <option value="C4A.39">
+    <option value="C4A.4">
+    <option value="C4A.51">
+    <option value="C4A.52">
+    <option value="C4A.59">
+    <option value="C4A.60">
+    <option value="C4A.61">
+    <option value="C4A.62">
+    <option value="C4A.70">
+    <option value="C4A.71">
+    <option value="C4A.72">
+    <option value="C4A.8">
+    <option value="C4A.9">
+    <option value="C50.011">
+    <option value="C50.012">
+    <option value="C50.019">
+    <option value="C50.021">
+    <option value="C50.029">
+    <option value="C50.111">
+    <option value="C50.112">
+    <option value="C50.119">
+    <option value="C50.121">
+    <option value="C50.122">
+    <option value="C50.129">
+    <option value="C50.211">
+    <option value="C50.212">
+    <option value="C50.219">
+    <option value="C50.221">
+    <option value="C50.213">
+    <option value="C50.214">
+    <option value="C50.215">
+    <option value="C50.216">
+    <option value="C50.217">
+    <option value="C50.229">
+    <option value="C50.311">
+    <option value="C50.312">
+    <option value="C50.319">
+    <option value="C50.321">
+    <option value="C50.322">
+    <option value="C50.329">
+    <option value="C50.411">
+    <option value="C50.412">
+    <option value="C50.419">
+    <option value="C50.421">
+    <option value="C50.422">
+    <option value="C50.429">
+    <option value="C50.511">
+    <option value="C50.512">
+    <option value="C50.519">
+    <option value="C50.521">
+    <option value="C50.522">
+    <option value="C50.529">
+    <option value="C50.611">
+    <option value="C50.612">
+    <option value="C50.619">
+    <option value="C50.621">
+    <option value="C50.622">
+    <option value="C50.629">
+    <option value="C50.811">
+    <option value="C50.812">
+    <option value="C50.819">
+    <option value="C50.821">
+    <option value="C50.822">
+    <option value="C50.829">
+    <option value="C50.911">
+    <option value="C50.912">
+    <option value="C50.919">
+    <option value="C50.921">
+    <option value="C50.922">
+    <option value="C50.929">
+    <option value="C51.0">
+    <option value="C51.1">
+    <option value="C51.2">
+    <option value="C51.8">
+    <option value="C51.9">
+    <option value="C52">
+    <option value="C53.0">
+    <option value="C53.1">
+    <option value="C53.8">
+    <option value="C53.9">
+    <option value="C54.0">
+    <option value="C54.1">
+    <option value="C54.2">
+    <option value="C54.3">
+    <option value="C54.8">
+    <option value="C54.9">
+    <option value="C55">
+    <option value="C56.1">
+    <option value="C56.3">
+    <option value="C56.2">
+    <option value="C56.9">
+    <option value="C57.00">
+    <option value="C57.01">
+    <option value="C57.02">
+    <option value="C57.10">
+    <option value="C57.11">
+    <option value="C57.12">
+    <option value="C57.20">
+    <option value="C57.21">
+    <option value="C57.22">
+    <option value="C57.3">
+    <option value="C57.4">
+    <option value="C57.7">
+    <option value="C57.8">
+    <option value="C57.9">
+    <option value="C58">
+    <option value="C60.0">
+    <option value="C60.1">
+    <option value="C60.2">
+    <option value="C60.8">
+    <option value="C60.9">
+    <option value="C61">
+    <option value="C62.00">
+    <option value="C62.01">
+    <option value="C62.02">
+    <option value="C62.10">
+    <option value="C62.11">
+    <option value="C62.12">
+    <option value="C62.90">
+    <option value="C62.91">
+    <option value="C62.92">
+    <option value="C63.00">
+    <option value="C63.01">
+    <option value="C63.02">
+    <option value="C63.10">
+    <option value="C63.11">
+    <option value="C63.12">
+    <option value="C63.2">
+    <option value="C63.7">
+    <option value="C63.8">
+    <option value="C63.9">
+    <option value="C64.1">
+    <option value="C64.2">
+    <option value="C64.9">
+    <option value="C65.1">
+    <option value="C65.2">
+    <option value="C65.9">
+    <option value="C66.1">
+    <option value="C66.2">
+    <option value="C66.9">
+    <option value="C67.0">
+    <option value="C67.1">
+    <option value="C67.2">
+    <option value="C67.3">
+    <option value="C67.4">
+    <option value="C67.5">
+    <option value="C67.6">
+    <option value="C67.7">
+    <option value="C67.8">
+    <option value="C67.9">
+    <option value="C68.0">
+    <option value="C68.1">
+    <option value="C68.8">
+    <option value="C68.9">
+    <option value="C69.00">
+    <option value="C69.01">
+    <option value="C69.02">
+    <option value="C69.10">
+    <option value="C69.11">
+    <option value="C69.12">
+    <option value="C69.20">
+    <option value="C69.21">
+    <option value="C69.22">
+    <option value="C69.30">
+    <option value="C69.31">
+    <option value="C69.32">
+    <option value="C69.40">
+    <option value="C69.41">
+    <option value="C69.42">
+    <option value="C69.50">
+    <option value="C69.51">
+    <option value="C69.52">
+    <option value="C69.60">
+    <option value="C69.61">
+    <option value="C69.62">
+    <option value="C69.80">
+    <option value="C69.81">
+    <option value="C69.82">
+    <option value="C69.90">
+    <option value="C69.91">
+    <option value="C69.92">
+    <option value="C70.0">
+    <option value="C70.1">
+    <option value="C70.9">
+    <option value="C71.0">
+    <option value="C71.1">
+    <option value="C71.2">
+    <option value="C71.3">
+    <option value="C71.4">
+    <option value="C71.5">
+    <option value="C71.6">
+    <option value="C71.7">
+    <option value="C71.8">
+    <option value="C71.9">
+    <option value="C72.0">
+    <option value="C72.1">
+    <option value="C72.20">
+    <option value="C72.21">
+    <option value="C72.22">
+    <option value="C72.30">
+    <option value="C72.31">
+    <option value="C72.32">
+    <option value="C72.40">
+    <option value="C72.41">
+    <option value="C72.42">
+    <option value="C72.50">
+    <option value="C72.59">
+    <option value="C72.9">
+    <option value="C73">
+    <option value="C74.00">
+    <option value="C74.01">
+    <option value="C74.02">
+    <option value="C74.10">
+    <option value="C74.11">
+    <option value="C74.12">
+    <option value="C74.90">
+    <option value="C74.91">
+    <option value="C74.92">
+    <option value="C75.0">
+    <option value="C75.1">
+    <option value="C75.2">
+    <option value="C75.3">
+    <option value="C75.4">
+    <option value="C75.5">
+    <option value="C75.8">
+    <option value="C75.9">
+    <option value="C76.0">
+    <option value="C76.1">
+    <option value="C76.2">
+    <option value="C76.3">
+    <option value="C76.40">
+    <option value="C76.41">
+    <option value="C76.42">
+    <option value="C76.50">
+    <option value="C76.51">
+    <option value="C76.52">
+    <option value="C76.8">
+    <option value="C77.0">
+    <option value="C77.1">
+    <option value="C77.2">
+    <option value="C77.3">
+    <option value="C77.4">
+    <option value="C77.5">
+    <option value="C77.8">
+    <option value="C77.9">
+    <option value="C78.00">
+    <option value="C78.01">
+    <option value="C78.02">
+    <option value="C78.1">
+    <option value="C78.2">
+    <option value="C78.30">
+    <option value="C78.39">
+    <option value="C78.4">
+    <option value="C78.5">
+    <option value="C78.6">
+    <option value="C78.7">
+    <option value="C78.80">
+    <option value="C78.89">
+    <option value="C79.00">
+    <option value="C79.01">
+    <option value="C79.02">
+    <option value="C79.10">
+    <option value="C79.11">
+    <option value="C79.19">
+    <option value="C79.2">
+    <option value="C79.31">
+    <option value="C79.32">
+    <option value="C79.40">
+    <option value="C79.49">
+    <option value="C79.51">
+    <option value="C79.52">
+    <option value="C79.60">
+    <option value="C79.61">
+    <option value="C79.63">
+    <option value="C79.62">
+    <option value="C79.70">
+    <option value="C79.71">
+    <option value="C79.72">
+    <option value="C79.81">
+    <option value="C79.82">
+    <option value="C79.89">
+    <option value="C79.9">
+    <option value="C7A.00">
+    <option value="C7A.010">
+    <option value="C7A.011">
+    <option value="C7A.012">
+    <option value="C7A.019">
+    <option value="C7A.020">
+    <option value="C7A.021">
+    <option value="C7A.022">
+    <option value="C7A.023">
+    <option value="C7A.024">
+    <option value="C7A.025">
+    <option value="C7A.026">
+    <option value="C7A.029">
+    <option value="C7A.090">
+    <option value="C7A.091">
+    <option value="C7A.092">
+    <option value="C7A.093">
+    <option value="C7A.094">
+    <option value="C7A.095">
+    <option value="C7A.096">
+    <option value="C7A.098">
+    <option value="C7A.1">
+    <option value="C7A.8">
+    <option value="C7B.00">
+    <option value="C7B.01">
+    <option value="C7B.02">
+    <option value="C7B.03">
+    <option value="C7B.04">
+    <option value="C7B.09">
+    <option value="C7B.1">
+    <option value="C7B.8">
+    <option value="C80.0">
+    <option value="C80.1">
+    <option value="C80.2">
+    <option value="C81.00">
+    <option value="C81.01">
+    <option value="C81.02">
+    <option value="C81.03">
+    <option value="C81.04">
+    <option value="C81.05">
+    <option value="C81.06">
+    <option value="C81.07">
+    <option value="C81.08">
+    <option value="C81.09">
+    <option value="C81.10">
+    <option value="C81.11">
+    <option value="C81.12">
+    <option value="C81.13">
+    <option value="C81.14">
+    <option value="C81.15">
+    <option value="C81.16">
+    <option value="C81.17">
+    <option value="C81.18">
+    <option value="C81.19">
+    <option value="C81.20">
+    <option value="C81.21">
+    <option value="C81.22">
+    <option value="C81.23">
+    <option value="C81.24">
+    <option value="C81.25">
+    <option value="C81.26">
+    <option value="C81.27">
+    <option value="C81.28">
+    <option value="C81.29">
+    <option value="C81.30">
+    <option value="C81.31">
+    <option value="C81.32">
+    <option value="C81.33">
+    <option value="C81.34">
+    <option value="C81.35">
+    <option value="C81.36">
+    <option value="C81.37">
+    <option value="C81.38">
+    <option value="C81.39">
+    <option value="C81.40">
+    <option value="C81.41">
+    <option value="C81.42">
+    <option value="C81.43">
+    <option value="C81.44">
+    <option value="C81.45">
+    <option value="C81.46">
+    <option value="C81.47">
+    <option value="C81.48">
+    <option value="C81.49">
+    <option value="C81.70">
+    <option value="C81.71">
+    <option value="C81.72">
+    <option value="C81.73">
+    <option value="C81.74">
+    <option value="C81.75">
+    <option value="C81..76">
+    <option value="C81.77">
+    <option value="C81.78">
+    <option value="C81.79">
+    <option value="C81.90">
+    <option value="C81.91">
+    <option value="C81.92">
+    <option value="C81.93">
+    <option value="C81.94">
+    <option value="C81.95">
+    <option value="C81.96">
+    <option value="C81.97">
+    <option value="C81.98">
+    <option value="C81.99">
+    <option value="C82.00">
+    <option value="C82.01">
+    <option value="C82.02">
+    <option value="C82.03">
+    <option value="C82.04">
+    <option value="C82.05">
+    <option value="C82.06">
+    <option value="C82.07">
+    <option value="C82.08">
+    <option value="C82.09">
+    <option value="C82.10">
+    <option value="C82.11">
+    <option value="C82.12">
+    <option value="C82.13">
+    <option value="C82.14">
+    <option value="C82.15">
+    <option value="C82.16">
+    <option value="C82.17">
+    <option value="C82.18">
+    <option value="C82.19">
+    <option value="C82.20">
+    <option value="C82.21">
+    <option value="C82.22">
+    <option value="C82.23">
+    <option value="C82.24">
+    <option value="C82.25">
+    <option value="C82.26">
+    <option value="C82.27">
+    <option value="C82.28">
+    <option value="C82.29">
+    <option value="C82.30">
+    <option value="C82.31">
+    <option value="C82.32">
+    <option value="C82.33">
+    <option value="C82.34">
+    <option value="C82.35">
+    <option value="C82.36">
+    <option value="C82.37">
+    <option value="C82.38">
+    <option value="C82.39">
+    <option value="C82.40">
+    <option value="C82.41">
+    <option value="C82.42">
+    <option value="C82.43">
+    <option value="C82.44">
+    <option value="C82.45">
+    <option value="C82.46">
+    <option value="C82.47">
+    <option value="C82.48">
+    <option value="C82.49">
+    <option value="C82.50">
+    <option value="C82.51">
+    <option value="C82.52">
+    <option value="C82.53">
+    <option value="C82.54">
+    <option value="C82.55">
+    <option value="C82.56">
+    <option value="C82.57">
+    <option value="C82.58">
+    <option value="C82.59">
+    <option value="C8260">
+    <option value="C82.61">
+    <option value="C82.62">
+    <option value="C82.63">
+    <option value="C82.64">
+    <option value="C82.65">
+    <option value="C82.66">
+    <option value="C82.67">
+    <option value="C82.68">
+    <option value="C82.69">
+    <option value="C82.80">
+    <option value="C82.81">
+    <option value="C82.82">
+    <option value="C82.83">
+    <option value="C82.84">
+    <option value="C82.85">
+    <option value="C82.86">
+    <option value="C82.87">
+    <option value="C82.88">
+    <option value="C82.89">
+    <option value="C8290">
+    <option value="C8291">
+    <option value="C82.92">
+    <option value="C82.93">
+    <option value="C82.94">
+    <option value="C82.95">
+    <option value="C82.96">
+    <option value="C82.97">
+    <option value="C82.98">
+    <option value="C82.99">
+    <option value="C83.00">
+    <option value="C83.01">
+    <option value="C83.02">
+    <option value="C83.03">
+    <option value="C83.04">
+    <option value="C83.05">
+    <option value="C83.06">
+    <option value="C83.07">
+    <option value="C83.08">
+    <option value="C83.09">
+    <option value="C83.10">
+    <option value="C83.11">
+    <option value="C83.12">
+    <option value="C83.13">
+    <option value="C83.14">
+    <option value="C8315">
+    <option value="C83.16">
+    <option value="C83.17">
+    <option value="C83.18">
+    <option value="C83.19">
+    <option value="C83.30">
+    <option value="C83.31">
+    <option value="C83.32">
+    <option value="C83.33">
+    <option value="C83.34">
+    <option value="C83.35">
+    <option value="C83.36">
+    <option value="C83.37">
+    <option value="C83.38">
+    <option value="C83.39">
+    <option value="C83.50">
+    <option value="C83.51">
+    <option value="C83.52">
+    <option value="C83.53">
+    <option value="C83.54">
+    <option value="C83.55">
+    <option value="C83.56">
+    <option value="C83.57">
+    <option value="C83.58">
+    <option value="C83.59">
+    <option value="C83.70">
+    <option value="C83.71">
+    <option value="C83.72">
+    <option value="C83.73">
+    <option value="C83.74">
+    <option value="C83.75">
+    <option value="C83.76">
+    <option value="C83.77">
+    <option value="C83.78">
+    <option value="C83.79">
+    <option value="C83.80">
+    <option value="C83.81">
+    <option value="C83.82">
+    <option value="C83.83">
+    <option value="C83.84">
+    <option value="C83.85">
+    <option value="C83.86">
+    <option value="C83.87">
+    <option value="C83.88">
+    <option value="C83.89">
+    <option value="C83.90">
+    <option value="C83.91">
+    <option value="C83.92">
+    <option value="C83.93">
+    <option value="C83.94">
+    <option value="C83.95">
+    <option value="C83.96">
+    <option value="C83.97">
+    <option value="C83.98">
+    <option value="C83.99">
+    <option value="C84.00">
+    <option value="C84.01">
+    <option value="C84.02">
+    <option value="C84.03">
+    <option value="C84.04">
+    <option value="C84.05">
+    <option value="C84.06">
+    <option value="C84.07">
+    <option value="C84.08">
+    <option value="C84.09">
+    <option value="C84.10">
+    <option value="C84.11">
+    <option value="C84.12">
+    <option value="C84.13">
+    <option value="C84.14">
+    <option value="C84.15">
+    <option value="C84.16">
+    <option value="C84.17">
+    <option value="C84.18">
+    <option value="C84.19">
+    <option value="C84.40">
+    <option value="C84.41">
+    <option value="C84.42">
+    <option value="C84.43">
+    <option value="C84.44">
+    <option value="C84.45">
+    <option value="C84.46">
+    <option value="C84.47">
+    <option value="C84.48">
+    <option value="C84.49">
+    <option value="C84.60">
+    <option value="C84.61">
+    <option value="C84.62">
+    <option value="C84.63">
+    <option value="C84.64">
+    <option value="C84.65">
+    <option value="C84.66">
+    <option value="C84.67">
+    <option value="C84.68">
+    <option value="C84.69">
+    <option value="C84.70">
+    <option value="C84.71">
+    <option value="C84.72">
+    <option value="C84.73">
+    <option value="C84.74">
+    <option value="C84.75">
+    <option value="C84.76">
+    <option value="C84.77">
+    <option value="C84.78">
+    <option value="C84.79">
+    <option value="C84.7A">
+    <option value="C84.90">
+    <option value="C84.91">
+    <option value="C84.92">
+    <option value="C84.93">
+    <option value="C84.94">
+    <option value="C84.95">
+    <option value="C84.96">
+    <option value="C84.97">
+    <option value="C84.98">
+    <option value="C84.99">
+    <option value="C84.A0">
+    <option value="C84.A1">
+    <option value="C84.A2">
+    <option value="C84.A3">
+    <option value="C84.A4">
+    <option value="C84.A5">
+    <option value="C84.A6">
+    <option value="C84A7">
+    <option value="C84.A8">
+    <option value="C84.A9">
+    <option value="C84.Z0">
+    <option value="C84.Z1">
+    <option value="C84.Z2">
+    <option value="C84.Z3">
+    <option value="C84.Z4">
+    <option value="C84.Z5">
+    <option value="C84.Z6">
+    <option value="C84.Z7">
+    <option value="C84.Z8">
+    <option value="C84.Z9">
+    <option value="C85.10">
+    <option value="C85.11">
+    <option value="C85.12">
+    <option value="C85.13">
+    <option value="C85.14">
+    <option value="C85.15">
+    <option value="C85.16">
+    <option value="C85.17">
+    <option value="C85.18">
+    <option value="C85.19">
+    <option value="C85.20">
+    <option value="C85.21">
+    <option value="C85.22">
+    <option value="C85.23">
+    <option value="C85.24">
+    <option value="C85.25">
+    <option value="C85.26">
+    <option value="C85.27">
+    <option value="C85.28">
+    <option value="C85.29">
+    <option value="C85.80">
+    <option value="C85.81">
+    <option value="C85.82">
+    <option value="C85.83">
+    <option value="C85.84">
+    <option value="C85.85">
+    <option value="C85.86">
+    <option value="C85.87">
+    <option value="C85.88">
+    <option value="C85.89">
+    <option value="C85.90">
+    <option value="C85.91">
+    <option value="C85.92">
+    <option value="C85.93">
+    <option value="C85.94">
+    <option value="C85.95">
+    <option value="C85.96">
+    <option value="C85.97">
+    <option value="C85.98">
+    <option value="C85.99">
+    <option value="C86.0">
+    <option value="C86.1">
+    <option value="C86.2">
+    <option value="C86.3">
+    <option value="C86.4">
+    <option value="C86.5">
+    <option value="C86.6">
+    <option value="C88.0">
+    <option value="C88.2">
+    <option value="C88.3">
+    <option value="C88.4">
+    <option value="C88.8">
+    <option value="C88.9">
+    <option value="C90.00">
+    <option value="C90.01">
+    <option value="C90.02">
+    <option value="C90.10">
+    <option value="C90.11">
+    <option value="C90.12">
+    <option value="C90.20">
+    <option value="C90.21">
+    <option value="C90.22">
+    <option value="C90.30">
+    <option value="C90.31">
+    <option value="C90.32">
+    <option value="C91.00">
+    <option value="C91.01">
+    <option value="C91.02">
+    <option value="C91.10">
+    <option value="C91.11">
+    <option value="C91.12">
+    <option value="C91.30">
+    <option value="C91.31">
+    <option value="C91.32">
+    <option value="C91.40">
+    <option value="C91.41">
+    <option value="C91.42">
+    <option value="C91.50">
+    <option value="C91.51">
+    <option value="C91.52">
+    <option value="C91.60">
+    <option value="C91.61">
+    <option value="C91.62">
+    <option value="C91.90">
+    <option value="C91.91">
+    <option value="C91.92">
+    <option value="C91.A0">
+    <option value="C91.A1">
+    <option value="C91.A2">
+    <option value="C91.Z0">
+    <option value="C91.Z1">
+    <option value="C91.Z2">
+    <option value="C92.00">
+    <option value="C92.01">
+    <option value="C92.02">
+    <option value="C92.10">
+    <option value="C92.11">
+    <option value="C92.12">
+    <option value="C92.20">
+    <option value="C92.21">
+    <option value="C92.22">
+    <option value="C92.30">
+    <option value="C92.31">
+    <option value="C92.32">
+    <option value="C92.40">
+    <option value="C92.41">
+    <option value="C92.42">
+    <option value="C92.50">
+    <option value="C92.51">
+    <option value="C92.52">
+    <option value="C92.60">
+    <option value="C92.61">
+    <option value="C92.62">
+    <option value="C92.90">
+    <option value="C92.91">
+    <option value="C92.92">
+    <option value="C92.A0">
+    <option value="C92.A1">
+    <option value="C92.A2">
+    <option value="C92.Z0">
+    <option value="C92.Z1">
+    <option value="C92.Z2">
+    <option value="C93.00">
+    <option value="C93.01">
+    <option value="C93.02">
+    <option value="C93.10">
+    <option value="C93.11">
+    <option value="C93.12">
+    <option value="C93.30">
+    <option value="C93.31">
+    <option value="C93.32">
+    <option value="C93.90">
+    <option value="C93.91">
+    <option value="C93.92">
+    <option value="C93.Z0">
+    <option value="C93.Z1">
+    <option value="C93.Z2">
+    <option value="C94.00">
+    <option value="C94.01">
+    <option value="C94.02">
+    <option value="C94.20">
+    <option value="C94.21">
+    <option value="C94.22">
+    <option value="C94.30">
+    <option value="C94.31">
+    <option value="C94.32">
+    <option value="C94.80">
+    <option value="C94.81">
+    <option value="C94.82">
+    <option value="C95.00">
+    <option value="C95.01">
+    <option value="C95.02">
+    <option value="C95.10">
+    <option value="C95.11">
+    <option value="C95.12">
+    <option value="C95.90">
+    <option value="C95.92">
+    <option value="C96.0">
+    <option value="C96.20">
+    <option value="C96.21">
+    <option value="C96.22">
+    <option value="C96.29">
+    <option value="C96.4">
+    <option value="C96.5">
+    <option value="C96.6">
+    <option value="C96.9">
+    <option value="C96.A">
+    <option value="C96.Z">
+    <option value="D66">
+    <option value="D67">
+    <option value="D68.1">
+    <option value="D68.2">
+    <option value="D46.4">
+    <option value="D55.0">
+    <option value="D75.A">
+    <option value="D55.1">
+    <option value="D55.2">
+    <option value="D55.21">
+    <option value="D55.29">
+    <option value="D55.3">
+    <option value="D55.8">
+    <option value="D55.9">
+    <option value="D56.0">
+    <option value="D56.1">
+    <option value="D56.2">
+    <option value="D56.3">
+    <option value="D56.4">
+    <option value="D56.5">
+    <option value="D56.8">
+    <option value="D56.9">
+    <option value="D57.00">
+    <option value="D57.03">
+    <option value="D57.09">
+    <option value="D57.01">
+    <option value="D57.02">
+    <option value="D57.1">
+    <option value="D57.20">
+    <option value="D57.211">
+    <option value="D57.212">
+    <option value="D57.213">
+    <option value="D57.218">
+    <option value="D57.219">
+    <option value="D57.3">
+    <option value="D57.40">
+    <option value="D57.42">
+    <option value="D57.44">
+    <option value="D57.411">
+    <option value="D57.412">
+    <option value="D57.413">
+    <option value="D57.418">
+    <option value="D57.419">
+    <option value="D57.431">
+    <option value="D57.432">
+    <option value="D57.433">
+    <option value="D57.438">
+    <option value="D57.439">
+    <option value="D57.451">
+    <option value="D57.452">
+    <option value="D57.453">
+    <option value="D57.458">
+    <option value="D57.459">
+    <option value="D57.80">
+    <option value="D57.811">
+    <option value="D57.812">
+    <option value="D57.813">
+    <option value="D57.818">
+    <option value="D57.819">
+    <option value="D58.0">
+    <option value="D58.1">
+    <option value="D58.2">
+    <option value="D58.8">
+    <option value="D58.9">
+    <option value="D59.0">
+    <option value="D59.1">
+    <option value="D59.10">
+    <option value="D59.11">
+    <option value="D59.12">
+    <option value="D5913">
+    <option value="D59.19">
+    <option value="D59.2">
+    <option value="D59.3">
+    <option value="D59.30">
+    <option value="D59.31">
+    <option value="D59.32">
+    <option value="D59.39">
+    <option value="D59.4">
+    <option value="D59.5">
+    <option value="D59.6">
+    <option value="D59.8">
+    <option value="D59.9">
+    <option value="D60.0">
+    <option value="D60.1">
+    <option value="D60.8">
+    <option value="D60.9">
+    <option value="D61.01">
+    <option value="D61.09">
+    <option value="D61.1">
+    <option value="D61.2">
+    <option value="D61.3">
+    <option value="D61.810">
+    <option value="D61.811">
+    <option value="D61.818">
+    <option value="D61.82">
+    <option value="D61.89">
+    <option value="D61.9">
+    <option value="I12.0">
+    <option value="I13.11">
+    <option value="I13.2">
+    <option value="N18.5">
+    <option value="N18.6">
+    <option value="I73.1">
+    <option value="K50.00">
+    <option value="K50.011">
+    <option value="K50.012">
+    <option value="K50.013">
+    <option value="K50.014">
+    <option value="K50.018">
+    <option value="K50.019">
+    <option value="K50.10">
+    <option value="K50.111">
+    <option value="K50.112">
+    <option value="K50.113">
+    <option value="K50.114">
+    <option value="K50.118">
+    <option value="K50.119">
+    <option value="K50.80">
+    <option value="K50.811">
+    <option value="K50.812">
+    <option value="K50.813">
+    <option value="K50.814">
+    <option value="K50.818">
+    <option value="K50.819">
+    <option value="K50.90">
+    <option value="K50.911">
+    <option value="K50.912">
+    <option value="K50.913">
+    <option value="K50.914">
+    <option value="K50.918">
+    <option value="K50.919">
+    <option value="K51.00">
+    <option value="K51.011">
+    <option value="K51.012">
+    <option value="K51.013">
+    <option value="K51.014">
+    <option value="K51.018">
+    <option value="K51.019">
+    <option value="K51.20">
+    <option value="K51.211">
+    <option value="K51.212">
+    <option value="K51.213">
+    <option value="K51.214">
+    <option value="K51.218">
+    <option value="K51.219">
+    <option value="K51.30">
+    <option value="K51.311">
+    <option value="K51.312">
+    <option value="K51.313">
+    <option value="K51.314">
+    <option value="K51.318">
+    <option value="K51.319">
+    <option value="K51.40">
+    <option value="K51.411">
+    <option value="K51.412">
+    <option value="K51.413">
+    <option value="K51.414">
+    <option value="K51.418">
+    <option value="K51.419">
+    <option value="K51.50">
+    <option value="K51.511">
+    <option value="K51.512">
+    <option value="K51.513">
+    <option value="K51.514">
+    <option value="K51.518">
+    <option value="K51.519">
+    <option value="K51.80">
+    <option value="K51.811">
+    <option value="K51.812">
+    <option value="K51.813">
+    <option value="K51.814">
+    <option value="K51.818">
+    <option value="K51.819">
+    <option value="K51.90">
+    <option value="K51.911">
+    <option value="K51.912">
+    <option value="K51.913">
+    <option value="K51.914">
+    <option value="K51.918">
+    <option value="K51.919">
+    <option value="L10.0">
+    <option value="L10.1">
+    <option value="L10.2">
+    <option value="L10.3">
+    <option value="L10.4">
+    <option value="L10.5">
+    <option value="L10.81">
+    <option value="L10.89">
+    <option value="L10..9">
+    <option value="M05.70">
+    <option value="M05.7A">
+    <option value="M05.711">
+    <option value="M05.712">
+    <option value="M05.719">
+    <option value="M05.721">
+    <option value="M05.722">
+    <option value="M05.729">
+    <option value="M05.731">
+    <option value="M05.732">
+    <option value="M05.739">
+    <option value="M05.741">
+    <option value="M05.742">
+    <option value="M05.749">
+    <option value="M05.751">
+    <option value="M05.752">
+    <option value="M05.759">
+    <option value="M05.761">
+    <option value="M05.762">
+    <option value="M05.769">
+    <option value="M05.771">
+    <option value="M05.772">
+    <option value="M05.779">
+    <option value="M05.79">
+    <option value="M05.80">
+    <option value="M05.8A">
+    <option value="M05.811">
+    <option value="M05.812">
+    <option value="M05.819">
+    <option value="M05.821">
+    <option value="M05.822">
+    <option value="M05.829">
+    <option value="M05.831">
+    <option value="M05.832">
+    <option value="M05.839">
+    <option value="M05.841">
+    <option value="M05.842">
+    <option value="M05.849">
+    <option value="M05.851">
+    <option value="M05.852">
+    <option value="M05.859">
+    <option value="M05.861">
+    <option value="M05.862">
+    <option value="M05.869">
+    <option value="M05.871">
+    <option value="M05.872">
+    <option value="M05.879">
+    <option value="M05.89">
+    <option value="M05.9">
+    <option value="M06.00">
+    <option value="M06.0A">
+    <option value="M06.011">
+    <option value="M06.012">
+    <option value="M06.019">
+    <option value="M06.021">
+    <option value="M06.022">
+    <option value="M06.029">
+    <option value="M06.031">
+    <option value="M06.032">
+    <option value="M06.039">
+    <option value="M06.041">
+    <option value="M06.042">
+    <option value="M06.049">
+    <option value="M06.051">
+    <option value="M06.052">
+    <option value="M06.059">
+    <option value="M06.061">
+    <option value="M06.062">
+    <option value="M06.069">
+    <option value="M06.071">
+    <option value="M06.072">
+    <option value="M06.079">
+    <option value="M06.08">
+    <option value="M06.09">
+    <option value="M06.20">
+    <option value="M06.211">
+    <option value="M06.212">
+    <option value="M06.219">
+    <option value="M06.221">
+    <option value="M06.222">
+    <option value="M06.229">
+    <option value="M06.231">
+    <option value="M06232">
+    <option value="M06.239">
+    <option value="M06.241">
+    <option value="M06.242">
+    <option value="M06.249">
+    <option value="M06.251">
+    <option value="M06.252">
+    <option value="M06.259">
+    <option value="M06.261">
+    <option value="M06.262">
+    <option value="M06.269">
+    <option value="M06.271">
+    <option value="M06.272">
+    <option value="M06.279">
+    <option value="M06.28">
+    <option value="M06.29">
+    <option value="M06.30">
+    <option value="M06.311">
+    <option value="M06.312">
+    <option value="M06.319">
+    <option value="M06.321">
+    <option value="M06.322">
+    <option value="M06.329">
+    <option value="M06.331">
+    <option value="M06.332">
+    <option value="M06.339">
+    <option value="M06.341">
+    <option value="M06.342">
+    <option value="M06.349">
+    <option value="M06.351">
+    <option value="M06.352">
+    <option value="M06.359">
+    <option value="M06.361">
+    <option value="M06.362">
+    <option value="M06.369">
+    <option value="M06.371">
+    <option value="M06.372">
+    <option value="M06.379">
+    <option value="M06.38">
+    <option value="M06.39">
+    <option value="M06.80">
+    <option value="M06.8A">
+    <option value="M06.811">
+    <option value="M06.812">
+    <option value="M06.819">
+    <option value="M06.821">
+    <option value="M06.822">
+    <option value="M06.829">
+    <option value="M06.831">
+    <option value="M06.832">
+    <option value="M06.839">
+    <option value="M06.841">
+    <option value="M06.842">
+    <option value="M06.849">
+    <option value="M06.851">
+    <option value="M06.852">
+    <option value="M06.859">
+    <option value="M06.861">
+    <option value="M06.862">
+    <option value="M06.869">
+    <option value="M06.871">
+    <option value="M06.872">
+    <option value="M06.879">
+    <option value="M06.88">
+    <option value="M06.89">
+    <option value="M06.9">
+    <option value="M08.00">
+    <option value="M08.0A">
+    <option value="M08.011">
+    <option value="M08.012">
+    <option value="M08.019">
+    <option value="M08.021">
+    <option value="M08.022">
+    <option value="M08.029">
+    <option value="M08.031">
+    <option value="M08.032">
+    <option value="M08.039">
+    <option value="M08.041">
+    <option value="M08.042">
+    <option value="M08.049">
+    <option value="M08.051">
+    <option value="M08.052">
+    <option value="M08.059">
+    <option value="M08.061">
+    <option value="M08.062">
+    <option value="M08.069">
+    <option value="M08.071">
+    <option value="M08.072">
+    <option value="M08.079">
+    <option value="M08.08">
+    <option value="M08.09">
+    <option value="M08.1">
+    <option value="M08.20">
+    <option value="M08.2A">
+    <option value="M08.211">
+    <option value="M08.212">
+    <option value="M08.219">
+    <option value="M08.221">
+    <option value="M08.222">
+    <option value="M08.229">
+    <option value="M08.231">
+    <option value="M08.232">
+    <option value="M08.239">
+    <option value="M08.241">
+    <option value="M08.242">
+    <option value="M08.249">
+    <option value="M08.251">
+    <option value="M08.252">
+    <option value="M08.259">
+    <option value="M08.261">
+    <option value="M08.262">
+    <option value="M08.269">
+    <option value="M08.271">
+    <option value="M08.272">
+    <option value="M08.279">
+    <option value="M08.28">
+    <option value="M08.29">
+    <option value="M08.3">
+    <option value="M08.40">
+    <option value="M08.4A">
+    <option value="M08.411">
+    <option value="M08.412">
+    <option value="M08.419">
+    <option value="M08.421">
+    <option value="M08.422">
+    <option value="M08.429">
+    <option value="M08.431">
+    <option value="M08.432">
+    <option value="M08.439">
+    <option value="M08.441">
+    <option value="M08.442">
+    <option value="M08.449">
+    <option value="M08.451">
+    <option value="M08.452">
+    <option value="M08.459">
+    <option value="M08.461">
+    <option value="M08.462">
+    <option value="M08.469">
+    <option value="M08.471">
+    <option value="M08.472">
+    <option value="M08.479">
+    <option value="M08.48">
+    <option value="M08.80">
+    <option value="M08.811">
+    <option value="M08.812">
+    <option value="M08.819">
+    <option value="M08.821">
+    <option value="M08.822">
+    <option value="M08.829">
+    <option value="M08.831">
+    <option value="M08.832">
+    <option value="M08.839">
+    <option value="M08.841">
+    <option value="M08.842">
+    <option value="M08.849">
+    <option value="M08.851">
+    <option value="M08.852">
+    <option value="M08.859">
+    <option value="M08.861">
+    <option value="M08.862">
+    <option value="M08.869">
+    <option value="M08.871">
+    <option value="M08.872">
+    <option value="M08.879">
+    <option value="M08.88">
+    <option value="M08.89">
+    <option value="M08.90">
+    <option value="M08.9A">
+    <option value="M08.911">
+    <option value="M08.912">
+    <option value="M08.919">
+    <option value="M08.921">
+    <option value="M08.922">
+    <option value="M08.929">
+    <option value="M08.931">
+    <option value="M08.932">
+    <option value="M08.939">
+    <option value="M08.941">
+    <option value="M08.942">
+    <option value="M08.949">
+    <option value="M08.951">
+    <option value="M08.952">
+    <option value="M08.959">
+    <option value="M08.961">
+    <option value="M08.962">
+    <option value="M08.969">
+    <option value="M08.971">
+    <option value="M08.972">
+    <option value="M08.979">
+    <option value="M08.98">
+    <option value="M08.99">
+    <option value="M30.0">
+    <option value="M30.2">
+    <option value="M30.3">
+    <option value="M30.8">
+    <option value="M31.0">
+    <option value="M31.30">
+    <option value="M31.31">
+    <option value="M31.4">
+    <option value="M31.5">
+    <option value="M31.6">
+    <option value="M32.0">
+    <option value="M32.10">
+    <option value="M32.11">
+    <option value="M32.12">
+    <option value="M32.13">
+    <option value="M32.14">
+    <option value="M32.15">
+    <option value="M32.19">
+    <option value="M32.8">
+    <option value="M32.9">
+    <option value="M33.00">
+    <option value="M33.03">
+    <option value="M33.01">
+    <option value="M33.02">
+    <option value="M33.09">
+    <option value="M33.10">
+    <option value="M33.13">
+    <option value="M33.11">
+    <option value="M33.12">
+    <option value="M33.19">
+    <option value="M33.20">
+    <option value="M33.21">
+    <option value="M33.22">
+    <option value="M33.29">
+    <option value="M33.90">
+    <option value="M33.93">
+    <option value="M33.91">
+    <option value="M33.92">
+    <option value="M33.99">
+    <option value="M34.0">
+    <option value="M34.1">
+    <option value="M34.2">
+    <option value="M34.81">
+    <option value="M34.82">
+    <option value="M34.83">
+    <option value="M34.89">
+    <option value="M34.9">
+    <option value="M35.00">
+    <option value="M35.01">
+    <option value="M35.02">
+    <option value="M35.03">
+    <option value="M35.04">
+    <option value="M35.05">
+    <option value="M35.06">
+    <option value="M35.07">
+    <option value="M35.08">
+    <option value="M35.09">
+    <option value="M35.0A">
+    <option value="M35.0B">
+    <option value="M35.0C">
+    <option value="M35.2">
+    <option value="M36.0">
+    <option value="F01.50">
+    <option value="F01.A0">
+    <option value="F01.B0">
+    <option value="F01.C0">
+    <option value="F01.51">
+    <option value="F01.511">
+    <option value="F01.518">
+    <option value="F01.52">
+    <option value="F01.53">
+    <option value="F01.54">
+    <option value="F01.A11">
+    <option value="F01.A18">
+    <option value="F01.A2">
+    <option value="F01.A3">
+    <option value="F01.A4">
+    <option value="F01.B11">
+    <option value="F01.B18">
+    <option value="F01.B2">
+    <option value="F01.B3">
+    <option value="F01.B4">
+    <option value="F01.C11">
+    <option value="F01.C18">
+    <option value="F01.C2">
+    <option value="F01.C3">
+    <option value="F01.C4">
+    <option value="F02.80">
+    <option value="F02.A0">
+    <option value="F02.B0">
+    <option value="F02.C0">
+    <option value="F02.81">
+    <option value="F02.811">
+    <option value="F02.818">
+    <option value="F02.82">
+    <option value="F02.83">
+    <option value="F02.84">
+    <option value="F02.A11">
+    <option value="F02.A18">
+    <option value="F02.A2">
+    <option value="F02.A3">
+    <option value="F02.A4">
+    <option value="F02.B11">
+    <option value="F02.B18">
+    <option value="F02.B2">
+    <option value="F02.B3">
+    <option value="F02.B4">
+    <option value="F02.C11">
+    <option value="F02.C18">
+    <option value="F02.C2">
+    <option value="F02.C3">
+    <option value="F02.C4">
+    <option value="F03.90">
+    <option value="F03.A0">
+    <option value="F03.B0">
+    <option value="F03.C0">
+    <option value="F03.911">
+    <option value="F03.918">
+    <option value="F03.92">
+    <option value="F03.93">
+    <option value="F03.94">
+    <option value="F03A11">
+    <option value="F03.A18">
+    <option value="F03.A2">
+    <option value="F03.A3">
+    <option value="F03.A4">
+    <option value="F03.B11">
+    <option value="F03.B18">
+    <option value="F03.B2">
+    <option value="F03.B3">
+    <option value="F03.B4">
+    <option value="F03.C11">
+    <option value="F03.C18">
+    <option value="F03.C2">
+    <option value="F03.C3">
+    <option value="F03.C4">
+    <option value="F05">
+    <option value="F06.0">
+    <option value="F06.1">
+    <option value="F06.8">
+    <option value="F20.0">
+    <option value="F20.1">
+    <option value="F20.2">
+    <option value="F20.3">
+    <option value="F20.5">
+    <option value="F20.81">
+    <option value="F20.89">
+    <option value="F20.9">
+    <option value="F22">
+    <option value="F25.0">
+    <option value="F25.1">
+    <option value="F25.8">
+    <option value="F25.9">
+    <option value="F30.10">
+    <option value="F30.11">
+    <option value="F30.12">
+    <option value="F30.13">
+    <option value="F30.2">
+    <option value="F30.3">
+    <option value="F30.4">
+    <option value="F30.8">
+    <option value="F30.9">
+    <option value="F31.0">
+    <option value="F31.10">
+    <option value="F31.11">
+    <option value="F31.12">
+    <option value="F31.13">
+    <option value="F31.2">
+    <option value="F31.30">
+    <option value="F31.31">
+    <option value="F31.32">
+    <option value="F31.4">
+    <option value="F31.5">
+    <option value="F31.60">
+    <option value="F31.61">
+    <option value="F31.62">
+    <option value="F31.63">
+    <option value="F31.64">
+    <option value="F31.70">
+    <option value="F31.71">
+    <option value="F31.72">
+    <option value="F31.73">
+    <option value="F31.74">
+    <option value="F31.75">
+    <option value="F31.76">
+    <option value="F31.77">
+    <option value="F31.78">
+    <option value="F31.81">
+    <option value="F31.89">
+    <option value="F31.9">
+    <option value="F32.2">
+    <option value="F32.3">
+    <option value="F32.4">
+    <option value="F32.5">
+    <option value="F32.8">
+    <option value="F32.81">
+    <option value="F32.89">
+    <option value="F32.9">
+    <option value="F32.A">
+    <option value="F33.2">
+    <option value="F33.3">
+    <option value="F33.40">
+    <option value="F33.41">
+    <option value="F33.42">
+    <option value="F33.8">
+    <option value="F33.9">
+    <option value="F840">
+    <option value="F84.3">
+    <option value="F84.5">
+    <option value="F84.8">
+    <option value="F84.9">
+    <option value="D81.3">
+    <option value="D81.30">
+    <option value="D81.31">
+    <option value="D81.32">
+    <option value="D81.39">
+    <option value="D815">
+    <option value="E000">
+    <option value="E001">
+    <option value="E002">
+    <option value="E009">
+    <option value="E030">
+    <option value="E031">
+    <option value="E1010">
+    <option value="E1011">
+    <option value="E1021">
+    <option value="E1022">
+    <option value="E1029">
+    <option value="E10311">
+    <option value="E10.37X1">
+    <option value="E10.37X2">
+    <option value="E10.37X3">
+    <option value="E10.37X9">
+    <option value="E10.319">
+    <option value="E10321">
+    <option value="E10.3211">
+    <option value="E10.3212">
+    <option value="E10.3213">
+    <option value="E10.3219">
+    <option value="E10.3291">
+    <option value="E10.3292">
+    <option value="E10.3293">
+    <option value="E10.3299">
+    <option value="E10.3311">
+    <option value="E10.3312">
+    <option value="E10.3313">
+    <option value="E10.3319">
+    <option value="E10.3391">
+    <option value="E10.3392">
+    <option value="E10.3393">
+    <option value="E10.3399">
+    <option value="E10.3411">
+    <option value="E10.3412">
+    <option value="E10.3413">
+    <option value="E10.3419">
+    <option value="E10.3491">
+    <option value="E10.3492">
+    <option value="E10.3493">
+    <option value="E10.3499">
+    <option value="E10.3511">
+    <option value="E10.3512">
+    <option value="E10.3513">
+    <option value="E10.3519">
+    <option value="E10.3521">
+    <option value="E10.3522">
+    <option value="E10.3523">
+    <option value="E10.3529">
+    <option value="E10.3531">
+    <option value="E10.3532">
+    <option value="E10.3533">
+    <option value="E10.3539">
+    <option value="E10.3541">
+    <option value="E10.3542">
+    <option value="E10.3543">
+    <option value="E10.3549">
+    <option value="E10.3551">
+    <option value="E10.3552">
+    <option value="E10.3553">
+    <option value="E10.3559">
+    <option value="E10.3591">
+    <option value="E10.3592">
+    <option value="E10.3593">
+    <option value="E10.3599">
+    <option value="E10.36">
+    <option value="E10.39">
+    <option value="E10.40">
+    <option value="E10.41">
+    <option value="E10.42">
+    <option value="E10.43">
+    <option value="E10.44">
+    <option value="E10.49">
+    <option value="E10.51">
+    <option value="E10.52">
+    <option value="E10.59">
+    <option value="E10.610">
+    <option value="E10.618">
+    <option value="E10.620">
+    <option value="E10.621">
+    <option value="E10.622">
+    <option value="E10.628">
+    <option value="E10.630">
+    <option value="E10.638">
+    <option value="E10.641">
+    <option value="E10.649">
+    <option value="E10.65">
+    <option value="E1069">
+    <option value="E10.8">
+    <option value="E10.9">
+    <option value="E20.1">
+    <option value="E23.2">
+    <option value="E25.0">
+    <option value="E25.8">
+    <option value="E25.9">
+    <option value="E70.0">
+    <option value="E70.1">
+    <option value="E70.20">
+    <option value="E70.21">
+    <option value="E70.29">
+    <option value="E70.30">
+    <option value="E70.310">
+    <option value="E70.311">
+    <option value="E70.318">
+    <option value="E70.319">
+    <option value="E70.320">
+    <option value="E70.321">
+    <option value="E703.28">
+    <option value="E703.29">
+    <option value="E703.30">
+    <option value="E703.31">
+    <option value="E703.38">
+    <option value="E703.39">
+    <option value="E70.39">
+    <option value="E70.40">
+    <option value="E70.41">
+    <option value="E70.49">
+    <option value="E70.5">
+    <option value="E70.8">
+    <option value="E70.81">
+    <option value="E70.89">
+    <option value="E70.9">
+    <option value="E71.0">
+    <option value="E71.110">
+    <option value="E71.111">
+    <option value="E71.118">
+    <option value="E71.120">
+    <option value="E71.121">
+    <option value="E71.128">
+    <option value="E71.19">
+    <option value="E71.2">
+    <option value="E71.310">
+    <option value="E71.311">
+    <option value="E71.312">
+    <option value="E71.313">
+    <option value="E71.314">
+    <option value="E71.318">
+    <option value="E71.32">
+    <option value="E71.39">
+    <option value="E71.40">
+    <option value="E71.41">
+    <option value="E71.42">
+    <option value="E71.43">
+    <option value="E71.440">
+    <option value="E71.448">
+    <option value="E71.50">
+    <option value="E71.510">
+    <option value="E71.511">
+    <option value="E71.518">
+    <option value="E71.520">
+    <option value="E71.521">
+    <option value="E71.522">
+    <option value="E71.528">
+    <option value="E71.529">
+    <option value="E71.53">
+    <option value="E71.540">
+    <option value="E71.541">
+    <option value="E71.542">
+    <option value="E71.548">
+    <option value="E72.00">
+    <option value="E72.01">
+    <option value="E72.02">
+    <option value="E72.03">
+    <option value="E72.04">
+    <option value="E72.09">
+    <option value="E72.10">
+    <option value="E72.11">
+    <option value="E72.12">
+    <option value="E72.19">
+    <option value="E72.20">
+    <option value="E72.21">
+    <option value="E72.22">
+    <option value="E72.23">
+    <option value="E72.29">
+    <option value="E72.3">
+    <option value="E72.4">
+    <option value="E72.50">
+    <option value="E72.51">
+    <option value="E72.59">
+    <option value="E7.28">
+    <option value="E72.81">
+    <option value="E72.89">
+    <option value="E72.9">
+    <option value="E74.00">
+    <option value="E74.01">
+    <option value="E74.02">
+    <option value="E74.03">
+    <option value="E74.04">
+    <option value="E74.09">
+    <option value="E74.20">
+    <option value="E74.21">
+    <option value="E74.29">
+    <option value="E75.21">
+    <option value="E75.22">
+    <option value="E75.240">
+    <option value="E75.244">
+    <option value="E75.241">
+    <option value="E75.242">
+    <option value="E75.243">
+    <option value="E75.248">
+    <option value="E75.249">
+    <option value="E75.3">
+    <option value="E75.6">
+    <option value="E76.01">
+    <option value="E76.02">
+    <option value="E76.03">
+    <option value="E76.1">
+    <option value="E76.210">
+    <option value="E76.211">
+    <option value="E76.219">
+    <option value="E76.22">
+    <option value="E76.29">
+    <option value="E76.3">
+    <option value="E76.8">
+    <option value="E76.9">
+    <option value="E77.0">
+    <option value="E77.1">
+    <option value="E77.8">
+    <option value="E77.9">
+    <option value="E78.1">
+    <option value="E78.70">
+    <option value="E789">
+    <option value="E79.1">
+    <option value="E79.2">
+    <option value="E79.8">
+    <option value="E79.9">
+    <option value="E80.3">
+    <option value="E83.00">
+    <option value="E83.01">
+    <option value="E83.09">
+    <option value="E83.50">
+    <option value="E83.51">
+    <option value="E83.52">
+    <option value="E83.59">
+    <option value="E83.81">
+    <option value="E88..1">
+    <option value="E88.40">
+    <option value="E88.41">
+    <option value="E88.42">
+    <option value="E88.49">
+    <option value="E88.81">
+    <option value="E88.89">
+    <option value="E88.9">
+    <option value="H49.811">
+    <option value="H49.812">
+    <option value="H49.813">
+    <option value="H49.819">
+    <option value="C16.5">
+    <option value="C24.1">
+    <option value="C4A.10">
+    <option value="C50022">
+    <option value="C50.218">
+    <option value="C50.220">
+    <option value="C50.222">
+    <option value="D59.13">
+    <option value="D5914">
+  </datalist>
+
+  <input type="text" id="resultText" readonly style="width:300px;" />
+</div>
+
+<!-- 智慧挑選病歷閾值 -->
+<div class="row">
+  <label>智慧挑選病歷閾值：</label>
+  <input type="text" id="aiThreshold" value="0.6" onblur="checkFloatRegex();" />
+</div>
+
+
+<!-- 取得病歷清單 -->
+<div class="row">
+  <button onclick="embeddingForm()">智慧挑選病歷</button>
+  <button onclick="zipForm()">壓縮病歷下載</button>
+</div>
+
+<!-- 結果表格 -->
+<div id="resultTable"></div>
+
+<script>
+// 可用的 key
+const mappings = {
+"C00.0": true,
+"C00.1": true,
+"C00.2": true,
+"C00.3": true,
+"C00.4": true,
+"C00.5": true,
+"C00.6": true,
+"C00.8": true,
+"C00.9": true,
+"C01": true,
+"C02.0": true,
+"C02.1": true,
+"C02.2": true,
+"C02.3": true,
+"C02.4": true,
+"C02.8": true,
+"C03.0": true,
+"C03.1": true,
+"C03.9": true,
+"C04.0": true,
+"C04.1": true,
+"C04.8": true,
+"C04.9": true,
+"C05.0": true,
+"C05.1": true,
+"C05.2": true,
+"C05.8": true,
+"C05.9": true,
+"C06.0": true,
+"C06.1": true,
+"C06.2": true,
+"C06.80": true,
+"C06.89": true,
+"C06.9": true,
+"C07": true,
+"C08.0": true,
+"C08.1": true,
+"C08.9": true,
+"C09.0": true,
+"C09.1": true,
+"C09.8": true,
+"C09.9": true,
+"C10.0": true,
+"C10.1": true,
+"C10.2": true,
+"C10.3": true,
+"C10.4": true,
+"C10.8": true,
+"C10.9": true,
+"C11.0": true,
+"C11.1": true,
+"C11.2": true,
+"C11.3": true,
+"C11.8": true,
+"C11.9": true,
+"C12": true,
+"C13.0": true,
+"C13.1": true,
+"C13.2": true,
+"C13.8": true,
+"C13.9": true,
+"C14.0": true,
+"C14.8": true,
+"C15.3": true,
+"C15.4": true,
+"C15.8": true,
+"C15.9": true,
+"C16.0": true,
+"C49.A1": true,
+"C16.1": true,
+"C16.3": true,
+"C16.4": true,
+"C16.6": true,
+"C16.8": true,
+"C16.9": true,
+"C49.A2": true,
+"C17.0": true,
+"C17.1": true,
+"C17.2": true,
+"C17.3": true,
+"C17.8": true,
+"C17.9": true,
+"C18.0": true,
+"C18.1": true,
+"C18.2": true,
+"C18.3": true,
+"C18.4": true,
+"C18.5": true,
+"C18.6": true,
+"C18.7": true,
+"C18.8": true,
+"C18.9": true,
+"C19": true,
+"C20": true,
+"C21.0": true,
+"C21.1": true,
+"C21.2": true,
+"C21.8": true,
+"C22.0": true,
+"C22.1": true,
+"C22.2": true,
+"C22.3": true,
+"C22.4": true,
+"C22.7": true,
+"C22.8": true,
+"C22.9": true,
+"C23": true,
+"C24.0": true,
+"C24.8": true,
+"C24.9": true,
+"C25.0": true,
+"C25.1": true,
+"C25.2": true,
+"C25.3": true,
+"C25.4": true,
+"C25.7": true,
+"C25.8": true,
+"C25.9": true,
+"C26.0": true,
+"C26.1": true,
+"C26.9": true,
+"C30.0": true,
+"C30.1": true,
+"C31.0": true,
+"C31.1": true,
+"C31.2": true,
+"C31.3": true,
+"C31.8": true,
+"C31.9": true,
+"C32.0": true,
+"C32.1": true,
+"C32.2": true,
+"C32.3": true,
+"C32.8": true,
+"C32.9": true,
+"C33": true,
+"C34.00": true,
+"C34.01": true,
+"C34.02": true,
+"C34.10": true,
+"C34.11": true,
+"C34.12": true,
+"C34.2": true,
+"C34.30": true,
+"C34.31": true,
+"C34.32": true,
+"C34.80": true,
+"C34.81": true,
+"C34.82": true,
+"C34.90": true,
+"C34.91": true,
+"C34.92": true,
+"C37": true,
+"C38.0": true,
+"C38.1": true,
+"C38.2": true,
+"C38.3": true,
+"C38.4": true,
+"C38.8": true,
+"C39.0": true,
+"C39.9": true,
+"C40.00": true,
+"C40.01": true,
+"C40.02": true,
+"C40.10": true,
+"C40.11": true,
+"C40.12": true,
+"C40.20": true,
+"C40.21": true,
+"C40.22": true,
+"C40.30": true,
+"C40.31": true,
+"C40.32": true,
+"C40.80": true,
+"C40.81": true,
+"C40.82": true,
+"C40.90": true,
+"C40.91": true,
+"C40.92": true,
+"C41.0": true,
+"C41.1": true,
+"C41.2": true,
+"C41.3": true,
+"C41.4": true,
+"C41.9": true,
+"C43.0": true,
+"C43.10": true,
+"C43.111": true,
+"C43.112": true,
+"C43.121": true,
+"C43.122": true,
+"C43.20": true,
+"C43.21": true,
+"C43.22": true,
+"C43.30": true,
+"C43.31": true,
+"C43.39": true,
+"C43.4": true,
+"C43.51": true,
+"C43.52": true,
+"C43.59": true,
+"C43.60": true,
+"C43.61": true,
+"C43.62": true,
+"C43.70": true,
+"C43.71": true,
+"C43.72": true,
+"C43.8": true,
+"C43.9": true,
+"C44.00": true,
+"C44.01": true,
+"C44.02": true,
+"C44.09": true,
+"C44.101": true,
+"C44.1021": true,
+"C44.1022": true,
+"C44.1091": true,
+"C44.1092": true,
+"C44.111": true,
+"C44.1121": true,
+"C44.1122": true,
+"C44.1191": true,
+"C44.1192": true,
+"C44.121": true,
+"C44.1221": true,
+"C44.1222": true,
+"C44.1291": true,
+"C44.1292": true,
+"C44.131": true,
+"C44.191": true,
+"C44.1321": true,
+"C44.1322": true,
+"C44.1921": true,
+"C44.1922": true,
+"C44.1391": true,
+"C44.1392": true,
+"C44.1991": true,
+"C44.1992": true,
+"C44.201": true,
+"C44.202": true,
+"C44.209": true,
+"C44.211": true,
+"C44.212": true,
+"C44.219": true,
+"C44.221": true,
+"C44.222": true,
+"C44.229": true,
+"C44.291": true,
+"C44.292": true,
+"C44.299": true,
+"C44.300": true,
+"C44.301": true,
+"C44.309": true,
+"C44.310": true,
+"C44.311": true,
+"C44.319": true,
+"C44.320": true,
+"C44.321": true,
+"C44.329": true,
+"C44.390": true,
+"C44.391": true,
+"C44.399": true,
+"C44.40": true,
+"C44.41": true,
+"C44.42": true,
+"C44.49": true,
+"C44.500": true,
+"C44.501": true,
+"C44.509": true,
+"C44.510": true,
+"C44.511": true,
+"C44.519": true,
+"C44.520": true,
+"C44.521": true,
+"C44.529": true,
+"C44.590": true,
+"C44.591": true,
+"C44.599": true,
+"C44.601": true,
+"C44.602": true,
+"C44.609": true,
+"C44.611": true,
+"C44.612": true,
+"C44.619": true,
+"C44.621": true,
+"C44.622": true,
+"C44.629": true,
+"C44.691": true,
+"C44.692": true,
+"C44.699": true,
+"C44.701": true,
+"C44.702": true,
+"C44.709": true,
+"C44.711": true,
+"C44.712": true,
+"C44.719": true,
+"C44.721": true,
+"C44.722": true,
+"C44.729": true,
+"C44.791": true,
+"C44.792": true,
+"C44.799": true,
+"C44.80": true,
+"C44.81": true,
+"C44.82": true,
+"C44.89": true,
+"C44.90": true,
+"C44.91": true,
+"C44.92": true,
+"C44.99": true,
+"C45.0": true,
+"C45.1": true,
+"C45.2": true,
+"C45.7": true,
+"C45.9": true,
+"C46.0": true,
+"C46.1": true,
+"C46.2": true,
+"C46.3": true,
+"C46.4": true,
+"C46.50": true,
+"C46.51": true,
+"C46.52": true,
+"C46.7": true,
+"C46.9": true,
+"C47.0": true,
+"C47.10": true,
+"C47.11": true,
+"C47.12": true,
+"C47.20": true,
+"C47.21": true,
+"C47.22": true,
+"C47.3": true,
+"C47.4": true,
+"C47.5": true,
+"C47.6": true,
+"C47.8": true,
+"C47.9": true,
+"C48.0": true,
+"C48.1": true,
+"C48.2": true,
+"C48.8": true,
+"C49.0": true,
+"C49.10": true,
+"C49.11": true,
+"C49.12": true,
+"C49.20": true,
+"C49.21": true,
+"C49.22": true,
+"C49.3": true,
+"C49.4": true,
+"C49.A0": true,
+"C49.A3": true,
+"C49.A4": true,
+"C49.A5": true,
+"C49.5": true,
+"C49.6": true,
+"C49.A9": true,
+"C49.8": true,
+"C49.9": true,
+"C4A.0": true,
+"C4A10": true,
+"C4A.11": true,
+"C4A.112": true,
+"C4A.121": true,
+"C4A.122": true,
+"C4A.20": true,
+"C4A.21": true,
+"C4A.22": true,
+"C4A.30": true,
+"C4A.31": true,
+"C4A.39": true,
+"C4A.4": true,
+"C4A.51": true,
+"C4A.52": true,
+"C4A.59": true,
+"C4A.60": true,
+"C4A.61": true,
+"C4A.62": true,
+"C4A.70": true,
+"C4A.71": true,
+"C4A.72": true,
+"C4A.8": true,
+"C4A.9": true,
+"C50.011": true,
+"C50.012": true,
+"C50.019": true,
+"C50.021": true,
+"C50.029": true,
+"C50.111": true,
+"C50.112": true,
+"C50.119": true,
+"C50.121": true,
+"C50.122": true,
+"C50.129": true,
+"C50.211": true,
+"C50.212": true,
+"C50.219": true,
+"C50.221": true,
+"C50.213": true,
+"C50.214": true,
+"C50.215": true,
+"C50.216": true,
+"C50.217": true,
+"C50.229": true,
+"C50.311": true,
+"C50.312": true,
+"C50.319": true,
+"C50.321": true,
+"C50.322": true,
+"C50.329": true,
+"C50.411": true,
+"C50.412": true,
+"C50.419": true,
+"C50.421": true,
+"C50.422": true,
+"C50.429": true,
+"C50.511": true,
+"C50.512": true,
+"C50.519": true,
+"C50.521": true,
+"C50.522": true,
+"C50.529": true,
+"C50.611": true,
+"C50.612": true,
+"C50.619": true,
+"C50.621": true,
+"C50.622": true,
+"C50.629": true,
+"C50.811": true,
+"C50.812": true,
+"C50.819": true,
+"C50.821": true,
+"C50.822": true,
+"C50.829": true,
+"C50.911": true,
+"C50.912": true,
+"C50.919": true,
+"C50.921": true,
+"C50.922": true,
+"C50.929": true,
+"C51.0": true,
+"C51.1": true,
+"C51.2": true,
+"C51.8": true,
+"C51.9": true,
+"C52": true,
+"C53.0": true,
+"C53.1": true,
+"C53.8": true,
+"C53.9": true,
+"C54.0": true,
+"C54.1": true,
+"C54.2": true,
+"C54.3": true,
+"C54.8": true,
+"C54.9": true,
+"C55": true,
+"C56.1": true,
+"C56.3": true,
+"C56.2": true,
+"C56.9": true,
+"C57.00": true,
+"C57.01": true,
+"C57.02": true,
+"C57.10": true,
+"C57.11": true,
+"C57.12": true,
+"C57.20": true,
+"C57.21": true,
+"C57.22": true,
+"C57.3": true,
+"C57.4": true,
+"C57.7": true,
+"C57.8": true,
+"C57.9": true,
+"C58": true,
+"C60.0": true,
+"C60.1": true,
+"C60.2": true,
+"C60.8": true,
+"C60.9": true,
+"C61": true,
+"C62.00": true,
+"C62.01": true,
+"C62.02": true,
+"C62.10": true,
+"C62.11": true,
+"C62.12": true,
+"C62.90": true,
+"C62.91": true,
+"C62.92": true,
+"C63.00": true,
+"C63.01": true,
+"C63.02": true,
+"C63.10": true,
+"C63.11": true,
+"C63.12": true,
+"C63.2": true,
+"C63.7": true,
+"C63.8": true,
+"C63.9": true,
+"C64.1": true,
+"C64.2": true,
+"C64.9": true,
+"C65.1": true,
+"C65.2": true,
+"C65.9": true,
+"C66.1": true,
+"C66.2": true,
+"C66.9": true,
+"C67.0": true,
+"C67.1": true,
+"C67.2": true,
+"C67.3": true,
+"C67.4": true,
+"C67.5": true,
+"C67.6": true,
+"C67.7": true,
+"C67.8": true,
+"C67.9": true,
+"C68.0": true,
+"C68.1": true,
+"C68.8": true,
+"C68.9": true,
+"C69.00": true,
+"C69.01": true,
+"C69.02": true,
+"C69.10": true,
+"C69.11": true,
+"C69.12": true,
+"C69.20": true,
+"C69.21": true,
+"C69.22": true,
+"C69.30": true,
+"C69.31": true,
+"C69.32": true,
+"C69.40": true,
+"C69.41": true,
+"C69.42": true,
+"C69.50": true,
+"C69.51": true,
+"C69.52": true,
+"C69.60": true,
+"C69.61": true,
+"C69.62": true,
+"C69.80": true,
+"C69.81": true,
+"C69.82": true,
+"C69.90": true,
+"C69.91": true,
+"C69.92": true,
+"C70.0": true,
+"C70.1": true,
+"C70.9": true,
+"C71.0": true,
+"C71.1": true,
+"C71.2": true,
+"C71.3": true,
+"C71.4": true,
+"C71.5": true,
+"C71.6": true,
+"C71.7": true,
+"C71.8": true,
+"C71.9": true,
+"C72.0": true,
+"C72.1": true,
+"C72.20": true,
+"C72.21": true,
+"C72.22": true,
+"C72.30": true,
+"C72.31": true,
+"C72.32": true,
+"C72.40": true,
+"C72.41": true,
+"C72.42": true,
+"C72.50": true,
+"C72.59": true,
+"C72.9": true,
+"C73": true,
+"C74.00": true,
+"C74.01": true,
+"C74.02": true,
+"C74.10": true,
+"C74.11": true,
+"C74.12": true,
+"C74.90": true,
+"C74.91": true,
+"C74.92": true,
+"C75.0": true,
+"C75.1": true,
+"C75.2": true,
+"C75.3": true,
+"C75.4": true,
+"C75.5": true,
+"C75.8": true,
+"C75.9": true,
+"C76.0": true,
+"C76.1": true,
+"C76.2": true,
+"C76.3": true,
+"C76.40": true,
+"C76.41": true,
+"C76.42": true,
+"C76.50": true,
+"C76.51": true,
+"C76.52": true,
+"C76.8": true,
+"C77.0": true,
+"C77.1": true,
+"C77.2": true,
+"C77.3": true,
+"C77.4": true,
+"C77.5": true,
+"C77.8": true,
+"C77.9": true,
+"C78.00": true,
+"C78.01": true,
+"C78.02": true,
+"C78.1": true,
+"C78.2": true,
+"C78.30": true,
+"C78.39": true,
+"C78.4": true,
+"C78.5": true,
+"C78.6": true,
+"C78.7": true,
+"C78.80": true,
+"C78.89": true,
+"C79.00": true,
+"C79.01": true,
+"C79.02": true,
+"C79.10": true,
+"C79.11": true,
+"C79.19": true,
+"C79.2": true,
+"C79.31": true,
+"C79.32": true,
+"C79.40": true,
+"C79.49": true,
+"C79.51": true,
+"C79.52": true,
+"C79.60": true,
+"C79.61": true,
+"C79.63": true,
+"C79.62": true,
+"C79.70": true,
+"C79.71": true,
+"C79.72": true,
+"C79.81": true,
+"C79.82": true,
+"C79.89": true,
+"C79.9": true,
+"C7A.00": true,
+"C7A.010": true,
+"C7A.011": true,
+"C7A.012": true,
+"C7A.019": true,
+"C7A.020": true,
+"C7A.021": true,
+"C7A.022": true,
+"C7A.023": true,
+"C7A.024": true,
+"C7A.025": true,
+"C7A.026": true,
+"C7A.029": true,
+"C7A.090": true,
+"C7A.091": true,
+"C7A.092": true,
+"C7A.093": true,
+"C7A.094": true,
+"C7A.095": true,
+"C7A.096": true,
+"C7A.098": true,
+"C7A.1": true,
+"C7A.8": true,
+"C7B.00": true,
+"C7B.01": true,
+"C7B.02": true,
+"C7B.03": true,
+"C7B.04": true,
+"C7B.09": true,
+"C7B.1": true,
+"C7B.8": true,
+"C80.0": true,
+"C80.1": true,
+"C80.2": true,
+"C81.00": true,
+"C81.01": true,
+"C81.02": true,
+"C81.03": true,
+"C81.04": true,
+"C81.05": true,
+"C81.06": true,
+"C81.07": true,
+"C81.08": true,
+"C81.09": true,
+"C81.10": true,
+"C81.11": true,
+"C81.12": true,
+"C81.13": true,
+"C81.14": true,
+"C81.15": true,
+"C81.16": true,
+"C81.17": true,
+"C81.18": true,
+"C81.19": true,
+"C81.20": true,
+"C81.21": true,
+"C81.22": true,
+"C81.23": true,
+"C81.24": true,
+"C81.25": true,
+"C81.26": true,
+"C81.27": true,
+"C81.28": true,
+"C81.29": true,
+"C81.30": true,
+"C81.31": true,
+"C81.32": true,
+"C81.33": true,
+"C81.34": true,
+"C81.35": true,
+"C81.36": true,
+"C81.37": true,
+"C81.38": true,
+"C81.39": true,
+"C81.40": true,
+"C81.41": true,
+"C81.42": true,
+"C81.43": true,
+"C81.44": true,
+"C81.45": true,
+"C81.46": true,
+"C81.47": true,
+"C81.48": true,
+"C81.49": true,
+"C81.70": true,
+"C81.71": true,
+"C81.72": true,
+"C81.73": true,
+"C81.74": true,
+"C81.75": true,
+"C81..76": true,
+"C81.77": true,
+"C81.78": true,
+"C81.79": true,
+"C81.90": true,
+"C81.91": true,
+"C81.92": true,
+"C81.93": true,
+"C81.94": true,
+"C81.95": true,
+"C81.96": true,
+"C81.97": true,
+"C81.98": true,
+"C81.99": true,
+"C82.00": true,
+"C82.01": true,
+"C82.02": true,
+"C82.03": true,
+"C82.04": true,
+"C82.05": true,
+"C82.06": true,
+"C82.07": true,
+"C82.08": true,
+"C82.09": true,
+"C82.10": true,
+"C82.11": true,
+"C82.12": true,
+"C82.13": true,
+"C82.14": true,
+"C82.15": true,
+"C82.16": true,
+"C82.17": true,
+"C82.18": true,
+"C82.19": true,
+"C82.20": true,
+"C82.21": true,
+"C82.22": true,
+"C82.23": true,
+"C82.24": true,
+"C82.25": true,
+"C82.26": true,
+"C82.27": true,
+"C82.28": true,
+"C82.29": true,
+"C82.30": true,
+"C82.31": true,
+"C82.32": true,
+"C82.33": true,
+"C82.34": true,
+"C82.35": true,
+"C82.36": true,
+"C82.37": true,
+"C82.38": true,
+"C82.39": true,
+"C82.40": true,
+"C82.41": true,
+"C82.42": true,
+"C82.43": true,
+"C82.44": true,
+"C82.45": true,
+"C82.46": true,
+"C82.47": true,
+"C82.48": true,
+"C82.49": true,
+"C82.50": true,
+"C82.51": true,
+"C82.52": true,
+"C82.53": true,
+"C82.54": true,
+"C82.55": true,
+"C82.56": true,
+"C82.57": true,
+"C82.58": true,
+"C82.59": true,
+"C8260": true,
+"C82.61": true,
+"C82.62": true,
+"C82.63": true,
+"C82.64": true,
+"C82.65": true,
+"C82.66": true,
+"C82.67": true,
+"C82.68": true,
+"C82.69": true,
+"C82.80": true,
+"C82.81": true,
+"C82.82": true,
+"C82.83": true,
+"C82.84": true,
+"C82.85": true,
+"C82.86": true,
+"C82.87": true,
+"C82.88": true,
+"C82.89": true,
+"C8290": true,
+"C8291": true,
+"C82.92": true,
+"C82.93": true,
+"C82.94": true,
+"C82.95": true,
+"C82.96": true,
+"C82.97": true,
+"C82.98": true,
+"C82.99": true,
+"C83.00": true,
+"C83.01": true,
+"C83.02": true,
+"C83.03": true,
+"C83.04": true,
+"C83.05": true,
+"C83.06": true,
+"C83.07": true,
+"C83.08": true,
+"C83.09": true,
+"C83.10": true,
+"C83.11": true,
+"C83.12": true,
+"C83.13": true,
+"C83.14": true,
+"C8315": true,
+"C83.16": true,
+"C83.17": true,
+"C83.18": true,
+"C83.19": true,
+"C83.30": true,
+"C83.31": true,
+"C83.32": true,
+"C83.33": true,
+"C83.34": true,
+"C83.35": true,
+"C83.36": true,
+"C83.37": true,
+"C83.38": true,
+"C83.39": true,
+"C83.50": true,
+"C83.51": true,
+"C83.52": true,
+"C83.53": true,
+"C83.54": true,
+"C83.55": true,
+"C83.56": true,
+"C83.57": true,
+"C83.58": true,
+"C83.59": true,
+"C83.70": true,
+"C83.71": true,
+"C83.72": true,
+"C83.73": true,
+"C83.74": true,
+"C83.75": true,
+"C83.76": true,
+"C83.77": true,
+"C83.78": true,
+"C83.79": true,
+"C83.80": true,
+"C83.81": true,
+"C83.82": true,
+"C83.83": true,
+"C83.84": true,
+"C83.85": true,
+"C83.86": true,
+"C83.87": true,
+"C83.88": true,
+"C83.89": true,
+"C83.90": true,
+"C83.91": true,
+"C83.92": true,
+"C83.93": true,
+"C83.94": true,
+"C83.95": true,
+"C83.96": true,
+"C83.97": true,
+"C83.98": true,
+"C83.99": true,
+"C84.00": true,
+"C84.01": true,
+"C84.02": true,
+"C84.03": true,
+"C84.04": true,
+"C84.05": true,
+"C84.06": true,
+"C84.07": true,
+"C84.08": true,
+"C84.09": true,
+"C84.10": true,
+"C84.11": true,
+"C84.12": true,
+"C84.13": true,
+"C84.14": true,
+"C84.15": true,
+"C84.16": true,
+"C84.17": true,
+"C84.18": true,
+"C84.19": true,
+"C84.40": true,
+"C84.41": true,
+"C84.42": true,
+"C84.43": true,
+"C84.44": true,
+"C84.45": true,
+"C84.46": true,
+"C84.47": true,
+"C84.48": true,
+"C84.49": true,
+"C84.60": true,
+"C84.61": true,
+"C84.62": true,
+"C84.63": true,
+"C84.64": true,
+"C84.65": true,
+"C84.66": true,
+"C84.67": true,
+"C84.68": true,
+"C84.69": true,
+"C84.70": true,
+"C84.71": true,
+"C84.72": true,
+"C84.73": true,
+"C84.74": true,
+"C84.75": true,
+"C84.76": true,
+"C84.77": true,
+"C84.78": true,
+"C84.79": true,
+"C84.7A": true,
+"C84.90": true,
+"C84.91": true,
+"C84.92": true,
+"C84.93": true,
+"C84.94": true,
+"C84.95": true,
+"C84.96": true,
+"C84.97": true,
+"C84.98": true,
+"C84.99": true,
+"C84.A0": true,
+"C84.A1": true,
+"C84.A2": true,
+"C84.A3": true,
+"C84.A4": true,
+"C84.A5": true,
+"C84.A6": true,
+"C84A7": true,
+"C84.A8": true,
+"C84.A9": true,
+"C84.Z0": true,
+"C84.Z1": true,
+"C84.Z2": true,
+"C84.Z3": true,
+"C84.Z4": true,
+"C84.Z5": true,
+"C84.Z6": true,
+"C84.Z7": true,
+"C84.Z8": true,
+"C84.Z9": true,
+"C85.10": true,
+"C85.11": true,
+"C85.12": true,
+"C85.13": true,
+"C85.14": true,
+"C85.15": true,
+"C85.16": true,
+"C85.17": true,
+"C85.18": true,
+"C85.19": true,
+"C85.20": true,
+"C85.21": true,
+"C85.22": true,
+"C85.23": true,
+"C85.24": true,
+"C85.25": true,
+"C85.26": true,
+"C85.27": true,
+"C85.28": true,
+"C85.29": true,
+"C85.80": true,
+"C85.81": true,
+"C85.82": true,
+"C85.83": true,
+"C85.84": true,
+"C85.85": true,
+"C85.86": true,
+"C85.87": true,
+"C85.88": true,
+"C85.89": true,
+"C85.90": true,
+"C85.91": true,
+"C85.92": true,
+"C85.93": true,
+"C85.94": true,
+"C85.95": true,
+"C85.96": true,
+"C85.97": true,
+"C85.98": true,
+"C85.99": true,
+"C86.0": true,
+"C86.1": true,
+"C86.2": true,
+"C86.3": true,
+"C86.4": true,
+"C86.5": true,
+"C86.6": true,
+"C88.0": true,
+"C88.2": true,
+"C88.3": true,
+"C88.4": true,
+"C88.8": true,
+"C88.9": true,
+"C90.00": true,
+"C90.01": true,
+"C90.02": true,
+"C90.10": true,
+"C90.11": true,
+"C90.12": true,
+"C90.20": true,
+"C90.21": true,
+"C90.22": true,
+"C90.30": true,
+"C90.31": true,
+"C90.32": true,
+"C91.00": true,
+"C91.01": true,
+"C91.02": true,
+"C91.10": true,
+"C91.11": true,
+"C91.12": true,
+"C91.30": true,
+"C91.31": true,
+"C91.32": true,
+"C91.40": true,
+"C91.41": true,
+"C91.42": true,
+"C91.50": true,
+"C91.51": true,
+"C91.52": true,
+"C91.60": true,
+"C91.61": true,
+"C91.62": true,
+"C91.90": true,
+"C91.91": true,
+"C91.92": true,
+"C91.A0": true,
+"C91.A1": true,
+"C91.A2": true,
+"C91.Z0": true,
+"C91.Z1": true,
+"C91.Z2": true,
+"C92.00": true,
+"C92.01": true,
+"C92.02": true,
+"C92.10": true,
+"C92.11": true,
+"C92.12": true,
+"C92.20": true,
+"C92.21": true,
+"C92.22": true,
+"C92.30": true,
+"C92.31": true,
+"C92.32": true,
+"C92.40": true,
+"C92.41": true,
+"C92.42": true,
+"C92.50": true,
+"C92.51": true,
+"C92.52": true,
+"C92.60": true,
+"C92.61": true,
+"C92.62": true,
+"C92.90": true,
+"C92.91": true,
+"C92.92": true,
+"C92.A0": true,
+"C92.A1": true,
+"C92.A2": true,
+"C92.Z0": true,
+"C92.Z1": true,
+"C92.Z2": true,
+"C93.00": true,
+"C93.01": true,
+"C93.02": true,
+"C93.10": true,
+"C93.11": true,
+"C93.12": true,
+"C93.30": true,
+"C93.31": true,
+"C93.32": true,
+"C93.90": true,
+"C93.91": true,
+"C93.92": true,
+"C93.Z0": true,
+"C93.Z1": true,
+"C93.Z2": true,
+"C94.00": true,
+"C94.01": true,
+"C94.02": true,
+"C94.20": true,
+"C94.21": true,
+"C94.22": true,
+"C94.30": true,
+"C94.31": true,
+"C94.32": true,
+"C94.80": true,
+"C94.81": true,
+"C94.82": true,
+"C95.00": true,
+"C95.01": true,
+"C95.02": true,
+"C95.10": true,
+"C95.11": true,
+"C95.12": true,
+"C95.90": true,
+"C95.92": true,
+"C96.0": true,
+"C96.20": true,
+"C96.21": true,
+"C96.22": true,
+"C96.29": true,
+"C96.4": true,
+"C96.5": true,
+"C96.6": true,
+"C96.9": true,
+"C96.A": true,
+"C96.Z": true,
+"D66": true,
+"D67": true,
+"D68.1": true,
+"D68.2": true,
+"D46.4": true,
+"D55.0": true,
+"D75.A": true,
+"D55.1": true,
+"D55.2": true,
+"D55.21": true,
+"D55.29": true,
+"D55.3": true,
+"D55.8": true,
+"D55.9": true,
+"D56.0": true,
+"D56.1": true,
+"D56.2": true,
+"D56.3": true,
+"D56.4": true,
+"D56.5": true,
+"D56.8": true,
+"D56.9": true,
+"D57.00": true,
+"D57.03": true,
+"D57.09": true,
+"D57.01": true,
+"D57.02": true,
+"D57.1": true,
+"D57.20": true,
+"D57.211": true,
+"D57.212": true,
+"D57.213": true,
+"D57.218": true,
+"D57.219": true,
+"D57.3": true,
+"D57.40": true,
+"D57.42": true,
+"D57.44": true,
+"D57.411": true,
+"D57.412": true,
+"D57.413": true,
+"D57.418": true,
+"D57.419": true,
+"D57.431": true,
+"D57.432": true,
+"D57.433": true,
+"D57.438": true,
+"D57.439": true,
+"D57.451": true,
+"D57.452": true,
+"D57.453": true,
+"D57.458": true,
+"D57.459": true,
+"D57.80": true,
+"D57.811": true,
+"D57.812": true,
+"D57.813": true,
+"D57.818": true,
+"D57.819": true,
+"D58.0": true,
+"D58.1": true,
+"D58.2": true,
+"D58.8": true,
+"D58.9": true,
+"D59.0": true,
+"D59.1": true,
+"D59.10": true,
+"D59.11": true,
+"D59.12": true,
+"D5913": true,
+"D59.19": true,
+"D59.2": true,
+"D59.3": true,
+"D59.30": true,
+"D59.31": true,
+"D59.32": true,
+"D59.39": true,
+"D59.4": true,
+"D59.5": true,
+"D59.6": true,
+"D59.8": true,
+"D59.9": true,
+"D60.0": true,
+"D60.1": true,
+"D60.8": true,
+"D60.9": true,
+"D61.01": true,
+"D61.09": true,
+"D61.1": true,
+"D61.2": true,
+"D61.3": true,
+"D61.810": true,
+"D61.811": true,
+"D61.818": true,
+"D61.82": true,
+"D61.89": true,
+"D61.9": true,
+"I12.0": true,
+"I13.11": true,
+"I13.2": true,
+"N18.5": true,
+"N18.6": true,
+"I73.1": true,
+"K50.00": true,
+"K50.011": true,
+"K50.012": true,
+"K50.013": true,
+"K50.014": true,
+"K50.018": true,
+"K50.019": true,
+"K50.10": true,
+"K50.111": true,
+"K50.112": true,
+"K50.113": true,
+"K50.114": true,
+"K50.118": true,
+"K50.119": true,
+"K50.80": true,
+"K50.811": true,
+"K50.812": true,
+"K50.813": true,
+"K50.814": true,
+"K50.818": true,
+"K50.819": true,
+"K50.90": true,
+"K50.911": true,
+"K50.912": true,
+"K50.913": true,
+"K50.914": true,
+"K50.918": true,
+"K50.919": true,
+"K51.00": true,
+"K51.011": true,
+"K51.012": true,
+"K51.013": true,
+"K51.014": true,
+"K51.018": true,
+"K51.019": true,
+"K51.20": true,
+"K51.211": true,
+"K51.212": true,
+"K51.213": true,
+"K51.214": true,
+"K51.218": true,
+"K51.219": true,
+"K51.30": true,
+"K51.311": true,
+"K51.312": true,
+"K51.313": true,
+"K51.314": true,
+"K51.318": true,
+"K51.319": true,
+"K51.40": true,
+"K51.411": true,
+"K51.412": true,
+"K51.413": true,
+"K51.414": true,
+"K51.418": true,
+"K51.419": true,
+"K51.50": true,
+"K51.511": true,
+"K51.512": true,
+"K51.513": true,
+"K51.514": true,
+"K51.518": true,
+"K51.519": true,
+"K51.80": true,
+"K51.811": true,
+"K51.812": true,
+"K51.813": true,
+"K51.814": true,
+"K51.818": true,
+"K51.819": true,
+"K51.90": true,
+"K51.911": true,
+"K51.912": true,
+"K51.913": true,
+"K51.914": true,
+"K51.918": true,
+"K51.919": true,
+"L10.0": true,
+"L10.1": true,
+"L10.2": true,
+"L10.3": true,
+"L10.4": true,
+"L10.5": true,
+"L10.81": true,
+"L10.89": true,
+"L10..9": true,
+"M05.70": true,
+"M05.7A": true,
+"M05.711": true,
+"M05.712": true,
+"M05.719": true,
+"M05.721": true,
+"M05.722": true,
+"M05.729": true,
+"M05.731": true,
+"M05.732": true,
+"M05.739": true,
+"M05.741": true,
+"M05.742": true,
+"M05.749": true,
+"M05.751": true,
+"M05.752": true,
+"M05.759": true,
+"M05.761": true,
+"M05.762": true,
+"M05.769": true,
+"M05.771": true,
+"M05.772": true,
+"M05.779": true,
+"M05.79": true,
+"M05.80": true,
+"M05.8A": true,
+"M05.811": true,
+"M05.812": true,
+"M05.819": true,
+"M05.821": true,
+"M05.822": true,
+"M05.829": true,
+"M05.831": true,
+"M05.832": true,
+"M05.839": true,
+"M05.841": true,
+"M05.842": true,
+"M05.849": true,
+"M05.851": true,
+"M05.852": true,
+"M05.859": true,
+"M05.861": true,
+"M05.862": true,
+"M05.869": true,
+"M05.871": true,
+"M05.872": true,
+"M05.879": true,
+"M05.89": true,
+"M05.9": true,
+"M06.00": true,
+"M06.0A": true,
+"M06.011": true,
+"M06.012": true,
+"M06.019": true,
+"M06.021": true,
+"M06.022": true,
+"M06.029": true,
+"M06.031": true,
+"M06.032": true,
+"M06.039": true,
+"M06.041": true,
+"M06.042": true,
+"M06.049": true,
+"M06.051": true,
+"M06.052": true,
+"M06.059": true,
+"M06.061": true,
+"M06.062": true,
+"M06.069": true,
+"M06.071": true,
+"M06.072": true,
+"M06.079": true,
+"M06.08": true,
+"M06.09": true,
+"M06.20": true,
+"M06.211": true,
+"M06.212": true,
+"M06.219": true,
+"M06.221": true,
+"M06.222": true,
+"M06.229": true,
+"M06.231": true,
+"M06232": true,
+"M06.239": true,
+"M06.241": true,
+"M06.242": true,
+"M06.249": true,
+"M06.251": true,
+"M06.252": true,
+"M06.259": true,
+"M06.261": true,
+"M06.262": true,
+"M06.269": true,
+"M06.271": true,
+"M06.272": true,
+"M06.279": true,
+"M06.28": true,
+"M06.29": true,
+"M06.30": true,
+"M06.311": true,
+"M06.312": true,
+"M06.319": true,
+"M06.321": true,
+"M06.322": true,
+"M06.329": true,
+"M06.331": true,
+"M06.332": true,
+"M06.339": true,
+"M06.341": true,
+"M06.342": true,
+"M06.349": true,
+"M06.351": true,
+"M06.352": true,
+"M06.359": true,
+"M06.361": true,
+"M06.362": true,
+"M06.369": true,
+"M06.371": true,
+"M06.372": true,
+"M06.379": true,
+"M06.38": true,
+"M06.39": true,
+"M06.80": true,
+"M06.8A": true,
+"M06.811": true,
+"M06.812": true,
+"M06.819": true,
+"M06.821": true,
+"M06.822": true,
+"M06.829": true,
+"M06.831": true,
+"M06.832": true,
+"M06.839": true,
+"M06.841": true,
+"M06.842": true,
+"M06.849": true,
+"M06.851": true,
+"M06.852": true,
+"M06.859": true,
+"M06.861": true,
+"M06.862": true,
+"M06.869": true,
+"M06.871": true,
+"M06.872": true,
+"M06.879": true,
+"M06.88": true,
+"M06.89": true,
+"M06.9": true,
+"M08.00": true,
+"M08.0A": true,
+"M08.011": true,
+"M08.012": true,
+"M08.019": true,
+"M08.021": true,
+"M08.022": true,
+"M08.029": true,
+"M08.031": true,
+"M08.032": true,
+"M08.039": true,
+"M08.041": true,
+"M08.042": true,
+"M08.049": true,
+"M08.051": true,
+"M08.052": true,
+"M08.059": true,
+"M08.061": true,
+"M08.062": true,
+"M08.069": true,
+"M08.071": true,
+"M08.072": true,
+"M08.079": true,
+"M08.08": true,
+"M08.09": true,
+"M08.1": true,
+"M08.20": true,
+"M08.2A": true,
+"M08.211": true,
+"M08.212": true,
+"M08.219": true,
+"M08.221": true,
+"M08.222": true,
+"M08.229": true,
+"M08.231": true,
+"M08.232": true,
+"M08.239": true,
+"M08.241": true,
+"M08.242": true,
+"M08.249": true,
+"M08.251": true,
+"M08.252": true,
+"M08.259": true,
+"M08.261": true,
+"M08.262": true,
+"M08.269": true,
+"M08.271": true,
+"M08.272": true,
+"M08.279": true,
+"M08.28": true,
+"M08.29": true,
+"M08.3": true,
+"M08.40": true,
+"M08.4A": true,
+"M08.411": true,
+"M08.412": true,
+"M08.419": true,
+"M08.421": true,
+"M08.422": true,
+"M08.429": true,
+"M08.431": true,
+"M08.432": true,
+"M08.439": true,
+"M08.441": true,
+"M08.442": true,
+"M08.449": true,
+"M08.451": true,
+"M08.452": true,
+"M08.459": true,
+"M08.461": true,
+"M08.462": true,
+"M08.469": true,
+"M08.471": true,
+"M08.472": true,
+"M08.479": true,
+"M08.48": true,
+"M08.80": true,
+"M08.811": true,
+"M08.812": true,
+"M08.819": true,
+"M08.821": true,
+"M08.822": true,
+"M08.829": true,
+"M08.831": true,
+"M08.832": true,
+"M08.839": true,
+"M08.841": true,
+"M08.842": true,
+"M08.849": true,
+"M08.851": true,
+"M08.852": true,
+"M08.859": true,
+"M08.861": true,
+"M08.862": true,
+"M08.869": true,
+"M08.871": true,
+"M08.872": true,
+"M08.879": true,
+"M08.88": true,
+"M08.89": true,
+"M08.90": true,
+"M08.9A": true,
+"M08.911": true,
+"M08.912": true,
+"M08.919": true,
+"M08.921": true,
+"M08.922": true,
+"M08.929": true,
+"M08.931": true,
+"M08.932": true,
+"M08.939": true,
+"M08.941": true,
+"M08.942": true,
+"M08.949": true,
+"M08.951": true,
+"M08.952": true,
+"M08.959": true,
+"M08.961": true,
+"M08.962": true,
+"M08.969": true,
+"M08.971": true,
+"M08.972": true,
+"M08.979": true,
+"M08.98": true,
+"M08.99": true,
+"M30.0": true,
+"M30.2": true,
+"M30.3": true,
+"M30.8": true,
+"M31.0": true,
+"M31.30": true,
+"M31.31": true,
+"M31.4": true,
+"M31.5": true,
+"M31.6": true,
+"M32.0": true,
+"M32.10": true,
+"M32.11": true,
+"M32.12": true,
+"M32.13": true,
+"M32.14": true,
+"M32.15": true,
+"M32.19": true,
+"M32.8": true,
+"M32.9": true,
+"M33.00": true,
+"M33.03": true,
+"M33.01": true,
+"M33.02": true,
+"M33.09": true,
+"M33.10": true,
+"M33.13": true,
+"M33.11": true,
+"M33.12": true,
+"M33.19": true,
+"M33.20": true,
+"M33.21": true,
+"M33.22": true,
+"M33.29": true,
+"M33.90": true,
+"M33.93": true,
+"M33.91": true,
+"M33.92": true,
+"M33.99": true,
+"M34.0": true,
+"M34.1": true,
+"M34.2": true,
+"M34.81": true,
+"M34.82": true,
+"M34.83": true,
+"M34.89": true,
+"M34.9": true,
+"M35.00": true,
+"M35.01": true,
+"M35.02": true,
+"M35.03": true,
+"M35.04": true,
+"M35.05": true,
+"M35.06": true,
+"M35.07": true,
+"M35.08": true,
+"M35.09": true,
+"M35.0A": true,
+"M35.0B": true,
+"M35.0C": true,
+"M35.2": true,
+"M36.0": true,
+"F01.50": true,
+"F01.A0": true,
+"F01.B0": true,
+"F01.C0": true,
+"F01.51": true,
+"F01.511": true,
+"F01.518": true,
+"F01.52": true,
+"F01.53": true,
+"F01.54": true,
+"F01.A11": true,
+"F01.A18": true,
+"F01.A2": true,
+"F01.A3": true,
+"F01.A4": true,
+"F01.B11": true,
+"F01.B18": true,
+"F01.B2": true,
+"F01.B3": true,
+"F01.B4": true,
+"F01.C11": true,
+"F01.C18": true,
+"F01.C2": true,
+"F01.C3": true,
+"F01.C4": true,
+"F02.80": true,
+"F02.A0": true,
+"F02.B0": true,
+"F02.C0": true,
+"F02.81": true,
+"F02.811": true,
+"F02.818": true,
+"F02.82": true,
+"F02.83": true,
+"F02.84": true,
+"F02.A11": true,
+"F02.A18": true,
+"F02.A2": true,
+"F02.A3": true,
+"F02.A4": true,
+"F02.B11": true,
+"F02.B18": true,
+"F02.B2": true,
+"F02.B3": true,
+"F02.B4": true,
+"F02.C11": true,
+"F02.C18": true,
+"F02.C2": true,
+"F02.C3": true,
+"F02.C4": true,
+"F03.90": true,
+"F03.A0": true,
+"F03.B0": true,
+"F03.C0": true,
+"F03.911": true,
+"F03.918": true,
+"F03.92": true,
+"F03.93": true,
+"F03.94": true,
+"F03A11": true,
+"F03.A18": true,
+"F03.A2": true,
+"F03.A3": true,
+"F03.A4": true,
+"F03.B11": true,
+"F03.B18": true,
+"F03.B2": true,
+"F03.B3": true,
+"F03.B4": true,
+"F03.C11": true,
+"F03.C18": true,
+"F03.C2": true,
+"F03.C3": true,
+"F03.C4": true,
+"F05": true,
+"F06.0": true,
+"F06.1": true,
+"F06.8": true,
+"F20.0": true,
+"F20.1": true,
+"F20.2": true,
+"F20.3": true,
+"F20.5": true,
+"F20.81": true,
+"F20.89": true,
+"F20.9": true,
+"F22": true,
+"F25.0": true,
+"F25.1": true,
+"F25.8": true,
+"F25.9": true,
+"F30.10": true,
+"F30.11": true,
+"F30.12": true,
+"F30.13": true,
+"F30.2": true,
+"F30.3": true,
+"F30.4": true,
+"F30.8": true,
+"F30.9": true,
+"F31.0": true,
+"F31.10": true,
+"F31.11": true,
+"F31.12": true,
+"F31.13": true,
+"F31.2": true,
+"F31.30": true,
+"F31.31": true,
+"F31.32": true,
+"F31.4": true,
+"F31.5": true,
+"F31.60": true,
+"F31.61": true,
+"F31.62": true,
+"F31.63": true,
+"F31.64": true,
+"F31.70": true,
+"F31.71": true,
+"F31.72": true,
+"F31.73": true,
+"F31.74": true,
+"F31.75": true,
+"F31.76": true,
+"F31.77": true,
+"F31.78": true,
+"F31.81": true,
+"F31.89": true,
+"F31.9": true,
+"F32.2": true,
+"F32.3": true,
+"F32.4": true,
+"F32.5": true,
+"F32.8": true,
+"F32.81": true,
+"F32.89": true,
+"F32.9": true,
+"F32.A": true,
+"F33.2": true,
+"F33.3": true,
+"F33.40": true,
+"F33.41": true,
+"F33.42": true,
+"F33.8": true,
+"F33.9": true,
+"F840": true,
+"F84.3": true,
+"F84.5": true,
+"F84.8": true,
+"F84.9": true,
+"D81.3": true,
+"D81.30": true,
+"D81.31": true,
+"D81.32": true,
+"D81.39": true,
+"D815": true,
+"E000": true,
+"E001": true,
+"E002": true,
+"E009": true,
+"E030": true,
+"E031": true,
+"E1010": true,
+"E1011": true,
+"E1021": true,
+"E1022": true,
+"E1029": true,
+"E10311": true,
+"E10.37X1": true,
+"E10.37X2": true,
+"E10.37X3": true,
+"E10.37X9": true,
+"E10.319": true,
+"E10321": true,
+"E10.3211": true,
+"E10.3212": true,
+"E10.3213": true,
+"E10.3219": true,
+"E10.3291": true,
+"E10.3292": true,
+"E10.3293": true,
+"E10.3299": true,
+"E10.3311": true,
+"E10.3312": true,
+"E10.3313": true,
+"E10.3319": true,
+"E10.3391": true,
+"E10.3392": true,
+"E10.3393": true,
+"E10.3399": true,
+"E10.3411": true,
+"E10.3412": true,
+"E10.3413": true,
+"E10.3419": true,
+"E10.3491": true,
+"E10.3492": true,
+"E10.3493": true,
+"E10.3499": true,
+"E10.3511": true,
+"E10.3512": true,
+"E10.3513": true,
+"E10.3519": true,
+"E10.3521": true,
+"E10.3522": true,
+"E10.3523": true,
+"E10.3529": true,
+"E10.3531": true,
+"E10.3532": true,
+"E10.3533": true,
+"E10.3539": true,
+"E10.3541": true,
+"E10.3542": true,
+"E10.3543": true,
+"E10.3549": true,
+"E10.3551": true,
+"E10.3552": true,
+"E10.3553": true,
+"E10.3559": true,
+"E10.3591": true,
+"E10.3592": true,
+"E10.3593": true,
+"E10.3599": true,
+"E10.36": true,
+"E10.39": true,
+"E10.40": true,
+"E10.41": true,
+"E10.42": true,
+"E10.43": true,
+"E10.44": true,
+"E10.49": true,
+"E10.51": true,
+"E10.52": true,
+"E10.59": true,
+"E10.610": true,
+"E10.618": true,
+"E10.620": true,
+"E10.621": true,
+"E10.622": true,
+"E10.628": true,
+"E10.630": true,
+"E10.638": true,
+"E10.641": true,
+"E10.649": true,
+"E10.65": true,
+"E1069": true,
+"E10.8": true,
+"E10.9": true,
+"E20.1": true,
+"E23.2": true,
+"E25.0": true,
+"E25.8": true,
+"E25.9": true,
+"E70.0": true,
+"E70.1": true,
+"E70.20": true,
+"E70.21": true,
+"E70.29": true,
+"E70.30": true,
+"E70.310": true,
+"E70.311": true,
+"E70.318": true,
+"E70.319": true,
+"E70.320": true,
+"E70.321": true,
+"E703.28": true,
+"E703.29": true,
+"E703.30": true,
+"E703.31": true,
+"E703.38": true,
+"E703.39": true,
+"E70.39": true,
+"E70.40": true,
+"E70.41": true,
+"E70.49": true,
+"E70.5": true,
+"E70.8": true,
+"E70.81": true,
+"E70.89": true,
+"E70.9": true,
+"E71.0": true,
+"E71.110": true,
+"E71.111": true,
+"E71.118": true,
+"E71.120": true,
+"E71.121": true,
+"E71.128": true,
+"E71.19": true,
+"E71.2": true,
+"E71.310": true,
+"E71.311": true,
+"E71.312": true,
+"E71.313": true,
+"E71.314": true,
+"E71.318": true,
+"E71.32": true,
+"E71.39": true,
+"E71.40": true,
+"E71.41": true,
+"E71.42": true,
+"E71.43": true,
+"E71.440": true,
+"E71.448": true,
+"E71.50": true,
+"E71.510": true,
+"E71.511": true,
+"E71.518": true,
+"E71.520": true,
+"E71.521": true,
+"E71.522": true,
+"E71.528": true,
+"E71.529": true,
+"E71.53": true,
+"E71.540": true,
+"E71.541": true,
+"E71.542": true,
+"E71.548": true,
+"E72.00": true,
+"E72.01": true,
+"E72.02": true,
+"E72.03": true,
+"E72.04": true,
+"E72.09": true,
+"E72.10": true,
+"E72.11": true,
+"E72.12": true,
+"E72.19": true,
+"E72.20": true,
+"E72.21": true,
+"E72.22": true,
+"E72.23": true,
+"E72.29": true,
+"E72.3": true,
+"E72.4": true,
+"E72.50": true,
+"E72.51": true,
+"E72.59": true,
+"E7.28": true,
+"E72.81": true,
+"E72.89": true,
+"E72.9": true,
+"E74.00": true,
+"E74.01": true,
+"E74.02": true,
+"E74.03": true,
+"E74.04": true,
+"E74.09": true,
+"E74.20": true,
+"E74.21": true,
+"E74.29": true,
+"E75.21": true,
+"E75.22": true,
+"E75.240": true,
+"E75.244": true,
+"E75.241": true,
+"E75.242": true,
+"E75.243": true,
+"E75.248": true,
+"E75.249": true,
+"E75.3": true,
+"E75.6": true,
+"E76.01": true,
+"E76.02": true,
+"E76.03": true,
+"E76.1": true,
+"E76.210": true,
+"E76.211": true,
+"E76.219": true,
+"E76.22": true,
+"E76.29": true,
+"E76.3": true,
+"E76.8": true,
+"E76.9": true,
+"E77.0": true,
+"E77.1": true,
+"E77.8": true,
+"E77.9": true,
+"E78.1": true,
+"E78.70": true,
+"E789": true,
+"E79.1": true,
+"E79.2": true,
+"E79.8": true,
+"E79.9": true,
+"E80.3": true,
+"E83.00": true,
+"E83.01": true,
+"E83.09": true,
+"E83.50": true,
+"E83.51": true,
+"E83.52": true,
+"E83.59": true,
+"E83.81": true,
+"E88..1": true,
+"E88.40": true,
+"E88.41": true,
+"E88.42": true,
+"E88.49": true,
+"E88.81": true,
+"E88.89": true,
+"E88.9": true,
+"H49.811": true,
+"H49.812": true,
+"H49.813": true,
+"H49.819": true,
+"C16.5": true,
+"C24.1": true,
+"C4A.10": true,
+"C50022": true,
+"C50.218": true,
+"C50.220": true,
+"C50.222": true,
+"D59.13": true,
+"D5914": true
+};
+
+// 處理下拉輸入行為
+async function handleDropdownChange() {
+	
+	event.preventDefault(); // 阻止輸入框換行。
+	const input = document.getElementById("dropdownInput");
+	const value = input.value;
+
+  // 若不在 mappings → 清空輸入框與文字框
+  if (!mappings[value]) {
+    input.value = "";
+    document.getElementById("resultText").value = "";
+    return;
+  }
+
+  // 若在 mappings → 呼叫 API
+  const apiUrl = "https://clinicaltables.nlm.nih.gov/api/icd10cm/v3/search?terms=" + encodeURIComponent(value);
+
+  try {
+    const response = await fetch(apiUrl);
+    const result = await response.json();
+
+    // result[3] 是結果陣列，如 [[code, name], ...]
+    let text = "查無資料";
+
+    if (Array.isArray(result) && result.length >= 4 && result[3].length > 0) {
+      const firstItem = result[3][0];
+      const code = firstItem[0] || "";
+      const name = firstItem[1] || "";
+      text = `${name}`;
+    }
+
+    document.getElementById("resultText").value = text;
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("resultText").value = "API 查詢失敗";
+  }
+
+}
+
+function checkFloatRegex() {
+	let floatRegex = /^-?\d*\.?\d+$/;
+	let inputValue = document.getElementById("aiThreshold").value;
+	if (!floatRegex.test(inputValue)) {
+		document.getElementById("aiThreshold").value = "0.6";
+	}
+}
+
+// 送出後產生表格
+function loadEMRForm() {
+  const id = document.getElementById("idInput").value;
+  const option = document.getElementById("dropdownInput").value;
+  const text = document.getElementById("resultText").value;
+
+  const html = `
+    <table>
+      <tr>
+        <th>選取</th>
+        <th>身份碼</th>
+        <th>選項</th>
+        <th>對應文字</th>
+      </tr>
+      <tr>
+        <td><input type="checkbox" /></td>
+        <td>${id}</td>
+        <td>${option}</td>
+        <td>${text}</td>
+      </tr>
+    </table>
+  `;
+
+  document.getElementById("resultTable").innerHTML = html;
+}
+</script>
+
+</body>
+</html>
