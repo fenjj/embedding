@@ -15,26 +15,9 @@
 
 <script type="text/javascript">//<![CDATA[
 
-    function getCookieByName(name) {
-        return value;
-    }
-    // // // $(document).ready(function() {
-    // // //   });
-    $(function() {
-        
-        FHIR.oauth2.ready().then(function(client) {
-            // Render the current patient (or any error)
-            client.patient.read().then(
-                function(pt) {
-                    document.getElementById("idInput").setAttribute('value', client.patient.id);
-                },
-                function(error) {
-                    document.getElementById("patient").innerText = error.stack;
-                }
-            );
-
+    function getBundleByPatient(patientId) {
             // Get ClinicalImpression for the selected patient
-            // "/ClinicalImpression?patient=" + client.patient.id
+            // "/ClinicalImpression?patient=" + patientId
             // "/Bundle?type=document"
             client.request("/Bundle?type=document", {
                 // resolveReferences: [ "note" ],
@@ -55,7 +38,23 @@
                 function(error) {
                     document.getElementById("resultTable").innerText = error.stack;
                 }
-            );        
+            );
+    }
+    // // // $(document).ready(function() {
+    // // //   });
+    $(function() {
+        
+        FHIR.oauth2.ready().then(function(client) {
+            // Render the current patient (or any error)
+            client.patient.read().then(
+                function(pt) {
+                    document.getElementById("idInput").setAttribute('value', client.patient.id);
+                },
+                function(error) {
+                    document.getElementById("patient").innerText = error.stack;
+                }
+            );
+            getBundleByPatient(client.patient.id);
         }).catch(console.error);
     });
 //]]></script>
@@ -67,7 +66,7 @@
   <label>身份碼：</label>
   <input type="text" id="idInput" />
   <!-- 
-  <button onclick="loadEMRForm()">重新取得病歷清單</button>
+  <button onclick="getBundleByPatient(document.getElementById('idInput').value)">重新取得病歷清單</button>
   -->
 </div>
 
