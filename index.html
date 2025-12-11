@@ -17,6 +17,7 @@
 <script type="text/javascript">//<![CDATA[
 
     function getBundleByPatient(patientId) {
+		FHIR.oauth2.ready().then(function(client) {
             // Get ClinicalImpression for the selected patient
             // "/ClinicalImpression?patient=" + patientId
             // "/Bundle?type=document"
@@ -40,6 +41,7 @@
                     document.getElementById("resultTable").innerText = error.stack;
                 }
             );
+		}).catch(console.error);	
     }
     // // // $(document).ready(function() {
     // // //   });
