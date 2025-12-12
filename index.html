@@ -27,7 +27,7 @@
             })
             // Reject if no ClinicalImpression are found
             .then(function(data) {
-				document.getElementById("resultTable").innerText = data;
+				document.getElementById("resultTable").innerText = JSON.stringify(data, null, 4);
                 // if (!data.entry || !data.entry.length) {
                 //     throw new Error("No ClinicalImpression found for the selected patient");
                 // }
