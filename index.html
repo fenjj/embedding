@@ -27,21 +27,19 @@
             })
             // Reject if no ClinicalImpression are found
             .then(function(data) {
-				document.getElementById("resultTable").innerText = JSON.stringify(data, null, 4);
-                // if (!data.entry || !data.entry.length) {
-                //     throw new Error("No ClinicalImpression found for the selected patient");
-                // }
-                // return data.entry;
+                if (!data.entry || !data.entry.length) {
+                    throw new Error("此病人無可調閱的Bundle文件。<br/>" + document.getElementById("resultTable").innerText = JSON.stringify(data, null, 4));
                 }
-			// )
+                return data.entry;
+            })
             // // // // // // // Render the current patient's ClinicalImpressions (or any error)
-            // .then(
-            //     function(meds) {
-            //         document.getElementById("resultTable").innerText = JSON.stringify(meds, null, 4);
-            //     },
-            //     function(error) {
-            //         document.getElementById("resultTable").innerText = error.stack;
-            //     }
+            .then(
+                function(meds) {
+                    document.getElementById("resultTable").innerText = JSON.stringify(meds, null, 4);
+                },
+                function(error) {
+                    document.getElementById("resultTable").innerText = error.stack;
+                }
             );
 		}).catch(console.error);	
     }
