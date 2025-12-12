@@ -47,15 +47,6 @@
     // // //   });
     // $(function() {
 
-        const datalist = document.getElementById("options");
-        for (const key in mappings) {
-            if (mappings[key]) {
-                const option = document.createElement("option");
-                option.value = key;
-                datalist.appendChild(option);
-            }
-        }
-
         FHIR.oauth2.ready().then(function(client) {
             // Render the current patient (or any error)
             client.patient.read().then(
@@ -2214,6 +2205,16 @@ const mappings = {
 "D59.13": true,
 "D5914": true
 };
+
+    const datalist = document.getElementById("options");
+    for (const key in mappings) {
+        if (mappings[key]) {
+            const option = document.createElement("option");
+            option.value = key;
+            datalist.appendChild(option);
+        }
+    }
+
 
 // 處理下拉輸入行為
 async function handleDropdownChange() {
