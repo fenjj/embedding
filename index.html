@@ -28,7 +28,7 @@
             // Reject if no ClinicalImpression are found
             .then(function(data) {
                 if (!data.entry || !data.entry.length) {
-                    throw new Error("此病人無可調閱的Bundle文件。<br/>" + document.getElementById("resultTable").innerText = JSON.stringify(data, null, 4));
+                    throw new Error("No Any Bundle Documents in this Patient.<br/>\n" + document.getElementById("resultTable").innerText = JSON.stringify(data, null, 4));
                 }
                 return data.entry;
             })
